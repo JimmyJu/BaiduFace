@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_marginLeft="@dimen/dp_15"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv"
+            android:scaleType="fitCenter"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_29"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:src="@mipmap/logo" />
+
+    </RelativeLayout>
+
+    <View
+        android:alpha="0"
+        android:id="@+id/location_view"
+        android:layout_centerInParent="true"
+        android:layout_width="@dimen/dp_25"
+        android:layout_height="@dimen/dp_20"/>
+
+    <RelativeLayout
+        android:layout_toLeftOf="@+id/location_view"
+        android:layout_above="@+id/location_view"
+        android:layout_width="@dimen/dp_90"
+        android:layout_height="@dimen/dp_110">
+
+        <Button
+            android:layout_alignParentTop="true"
+            android:id="@+id/btn_register"
+            android:layout_width="@dimen/dp_90"
+            android:layout_height="@dimen/dp_90"
+            android:background="@mipmap/home_btn_tab_renlianzhuce_normal"/>
+        <TextView
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="人脸注册"
+            android:textSize="@dimen/sp_14"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_toRightOf="@+id/location_view"
+        android:layout_above="@+id/location_view"
+        android:layout_width="@dimen/dp_90"
+        android:layout_height="@dimen/dp_110">
+
+        <Button
+            android:id="@+id/btn_user"
+            android:layout_width="@dimen/dp_90"
+            android:layout_height="@dimen/dp_90"
+            android:background="@mipmap/home_btn_tab_renliankuguanli_normal" />
+
+        <TextView
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="人脸库管理"
+            android:textSize="@dimen/sp_14"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_toLeftOf="@+id/location_view"
+        android:layout_below="@+id/location_view"
+        android:layout_width="@dimen/dp_90"
+        android:layout_height="@dimen/dp_110">
+
+        <Button
+            android:id="@+id/btn_setting"
+            android:layout_width="@dimen/dp_90"
+            android:layout_height="@dimen/dp_90"
+            android:background="@mipmap/home_btn_tab_gongnengshezhi_normal"/>
+
+        <TextView
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="功能设置"
+            android:textSize="@dimen/sp_14"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_view"
+        android:layout_toRightOf="@+id/location_view"
+        android:layout_below="@+id/location_view"
+        android:layout_width="@dimen/dp_90"
+        android:layout_height="@dimen/dp_110">
+
+        <Button
+            android:id="@+id/btn_auth"
+            android:layout_width="@dimen/dp_90"
+            android:layout_height="@dimen/dp_90"
+            android:background="@mipmap/home_btn_tab_shouquanjihuo_normal"/>
+
+        <TextView
+            android:layout_marginTop="@dimen/dp_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:text="授权激活"
+            android:textSize="@dimen/sp_14"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
+
+    </RelativeLayout>
+
+    <Button
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_below="@+id/rl_view"
+        android:id="@+id/btn_back"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@drawable/fillet_style_return_selector"
+        android:text="返回"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+</RelativeLayout>
