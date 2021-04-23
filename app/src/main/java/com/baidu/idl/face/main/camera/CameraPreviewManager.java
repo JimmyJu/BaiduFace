@@ -70,7 +70,7 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
     private int mCameraNum;
 
     private int displayOrientation = 0;
-    private int cameraId = 0;
+    private int cameraId = 1;
     private int mirror = 1; // 镜像处理
     private CameraDataCallback mCameraDataCallback;
     private static volatile CameraPreviewManager instance = null;
@@ -317,7 +317,7 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
             }
         } catch (RuntimeException e) {
             Log.e(TAG, "RuntimeException:" + e.getMessage());
-            ToastUtils.toast(mContext, "相机运行时Exception" + e.getMessage());
+            ToastUtils.toast(mContext, "相机运行时Exception：" + e.getMessage());
             //延迟两秒重新打开相机
             handler.postDelayed(new Runnable() {
                 @Override

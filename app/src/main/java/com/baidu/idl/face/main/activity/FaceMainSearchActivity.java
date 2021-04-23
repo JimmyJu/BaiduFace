@@ -3,11 +3,13 @@ package com.baidu.idl.face.main.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.facesdkdemo.R;
+import com.example.yfaceapi.GPIOManager;
 
 /**
  * 1：N 人脸检索
@@ -16,11 +18,13 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
 
     private Context mContext;
     public static final int PAGE_TYPE = 999;
-
+    GPIOManager manager;
+    private Handler handler = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_search);
+        manager = GPIOManager.getInstance(this);
 
         mContext = this;
         initView();
@@ -29,6 +33,12 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        delayCloseRedLight();
     }
 
     /**
@@ -64,5 +74,16 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
             default:
                 break;
         }
+    }
+
+    private void delayCloseRedLight() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                manager.pullDownRedLight();
+                manager.pullDownGreenLight();
+                manager.pullDownWhiteLight();
+            }
+        }, 2000);
     }
 }

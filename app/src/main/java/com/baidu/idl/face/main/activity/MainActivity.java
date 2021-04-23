@@ -33,12 +33,13 @@ import com.baidu.idl.face.main.utils.SPUtils;
 import com.baidu.idl.face.main.utils.ToastUtils;
 import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.facesdkdemo.R;
+import com.example.yfaceapi.GPIOManager;
 
 /**
  * 主功能页面，包含人脸检索入口，认证比对，功能设置，授权激活
  */
 public class MainActivity extends BaseActivity {
-
+    private GPIOManager manager;
     private Context mContext;
     private Boolean isInitConfig;
     private Boolean isConfigExit;
@@ -343,6 +344,9 @@ public class MainActivity extends BaseActivity {
         super.onDestroy();
         // 关闭数据库
         DBManager.getInstance().release();
+        GPIOManager.getInstance(this).pullDownRedLight();
+        GPIOManager.getInstance(this).pullDownGreenLight();
+        GPIOManager.getInstance(this).pullDownWhiteLight();
     }
 
 }

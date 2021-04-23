@@ -58,6 +58,7 @@ import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.face.main.view.DoubleClickListener;
 import com.baidu.idl.facesdkdemo.R;
 import com.baidu.idl.main.facesdk.FaceInfo;
+import com.example.yfaceapi.GPIOManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -72,6 +73,10 @@ import java.util.List;
  * @Description RGB关闭Debug页面
  */
 public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
+    private GPIOManager manager;
+
+    //亮度值
+    private static final int BRIGHTNESS_VALUE = 170;
 
     // 图片越大，性能消耗越大，也可以选择640*480， 1280*720
     private static final int PREFER_WIDTH = 640;
@@ -168,12 +173,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      */
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_face_rgb_close_debug);
 
         mContext = this;
+
+        manager = GPIOManager.getInstance(FaceRGBCloseDebugSearchActivity.this);
 
         initView();
 
@@ -414,9 +422,14 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                Log.e("bright", "白色补光的状态是: " + manager.getWhiteLightStatus()
+                        + "绿色补光的状态是: " + manager.getGreenLightStatus()
+                        + "红色补光的状态是: " + manager.getRedLightStatus());
                 if (livenessModel == null || livenessModel.getFaceInfo() == null || !faceSizeFilter(livenessModel.getFaceInfo(), width, height)) {
                     //隐藏识别成功、失败窗口
                     rlDiscernBg.setVisibility(View.GONE);
+                    //关闭状态灯
+                    closeAllLight();
                 } else {
                     float rgbLivenessScore = livenessModel.getRgbLivenessScore();
                     if (rgbLivenessScore < mRgbLiveScore) {
@@ -451,6 +464,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
                     //获取照片
                     mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
+                    //获取照片亮度值
+                    int bright = getBright(mRBmp);
+                    //如果这个值比128大，则这个图片较亮，如果这个值比128小，则这个图比较暗。
+                    if (bright > BRIGHTNESS_VALUE) {
+                        manager.pullDownWhiteLight();
+                    } else if (bright < BRIGHTNESS_VALUE) {
+                        manager.pullUpWhiteLight();
+                    }
+                    Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
                     //压缩照片
                     mRBmp.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
                     byte[] imageData = Utils.addBytes(imageHead, byteArrayOutputStream.toByteArray(), imageEnd);
@@ -459,6 +481,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     User user = livenessModel.getUser();
                     if (user == null) {
                         if (livenessModel.getFeatureContrastValue() < 80.00) {
+                            manager.pullDownGreenLight();
+                            manager.pullUpRedLight();
                             //延迟3秒发送给后台图片、特征值
                             delaySendData(livenessModel, imageData, null);
                             //识别失败
@@ -467,6 +491,9 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                             sendSerialPortData(null);
                         }
                     } else {
+                        manager.pullDownRedLight();
+                        manager.pullUpGreenLight();
+
                         if (faceImage.containsKey(user.getUserName())) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
                             //识别成功
@@ -509,6 +536,34 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         }
         return true;
     }
+
+    /**
+     * 延迟关闭绿灯
+     */
+//    private void delayCloseRedLight() {
+////        if (manager.getRedLightStatus().equals("1")) {
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                manager.pullDownRedLight();
+//            }
+//        }, 3000);
+////        }
+//    }
+
+    /**
+     *
+     */
+//    private void delayCloseGreenLight() {
+////        if (manager.getGreenLightStatus().equals("1")) {
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                manager.pullDownGreenLight();
+//            }
+//        }, 3000);
+////        }
+//    }
 
     /**
      * 延迟3秒发送给后台图片，特征，人名，卡号
@@ -684,8 +739,16 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 mediaPlayer = null;
             }
         }
+
+        closeAllLight();
         //关闭监听屏幕有没有卡住线程
         timeFlagBool = false;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        closeAllLight();
     }
 
     public void setUpDialog() {
@@ -795,6 +858,46 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 scanLeDevice();
             }
         }, 10 * 3000); //30秒内不可断开、连接重复5次
+    }
+
+    /**
+     * 获取图片亮度
+     * bitmap.getPixel返回的是ARGB值，通过移位操作获取到R、G、B的值，
+     * 使用亮度=0.229×R + 0.587*G + 0.114*B进行亮度值计算，
+     * 将所有点的亮度值相加后取一个平均值，
+     * 如果这个值比128大，则这个图片较亮，如果这个值比128小，则这个图比较暗。
+     */
+    private int getBright(Bitmap bm) {
+        Log.d("TAG", "getBright start");
+        if (bm == null) return -1;
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        int r, g, b;
+        int count = 0;
+        int bright = 0;
+        count = width * height;
+        int[] buffer = new int[width * height];
+        bm.getPixels(buffer, 0, width, 0, 0, width, height);
+        Log.d("TAG", "width:" + width + ",height:" + height);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int localTemp = buffer[j * width + i];//bm.getPixel(i, j);
+                r = (localTemp >> 16) & 0xff;
+                g = (localTemp >> 8) & 0xff;
+                b = localTemp & 0xff;
+                bright = (int) (bright + 0.299 * r + 0.587 * g + 0.114 * b);
+            }
+        }
+        Log.d("TAG", "getBright end");
+        return bright / count;
+
+    }
+
+    //关闭所有状态灯
+    private void closeAllLight() {
+        manager.pullDownWhiteLight();
+        manager.pullDownRedLight();
+        manager.pullDownGreenLight();
     }
 
 
