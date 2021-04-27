@@ -77,6 +77,12 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
     //亮度值
     private static final int BRIGHTNESS_VALUE = 170;
+    //补光灯状态
+    private int whiteLight_Status = 0;
+    private int RedLight_Status = 0;
+    private int GreenLight_Status = 0;
+    //检测灯状态
+    private boolean checkLight = true;
 
     // 图片越大，性能消耗越大，也可以选择640*480， 1280*720
     private static final int PREFER_WIDTH = 640;
@@ -186,7 +192,10 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         initView();
 
         //监听时间戳，获取被赋值的时间比当前时间小于1秒，说明屏幕卡住不动了
-        monitorTimestamp();
+//        monitorTimestamp();
+
+        //监听状态灯
+//        checkLightState();
 
         initSP();
         // 屏幕的宽
@@ -425,11 +434,16 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 Log.e("bright", "白色补光的状态是: " + manager.getWhiteLightStatus()
                         + "绿色补光的状态是: " + manager.getGreenLightStatus()
                         + "红色补光的状态是: " + manager.getRedLightStatus());
+
                 if (livenessModel == null || livenessModel.getFaceInfo() == null || !faceSizeFilter(livenessModel.getFaceInfo(), width, height)) {
                     //隐藏识别成功、失败窗口
                     rlDiscernBg.setVisibility(View.GONE);
-                    //关闭状态灯
-                    closeAllLight();
+                    //延迟关闭状态灯
+//                    closeAllLight();
+                    delayClose_Red_GedreenLight();
+                    whiteLight_Status = 0;
+                    RedLight_Status = 0;
+                    GreenLight_Status = 0;
                 } else {
                     float rgbLivenessScore = livenessModel.getRgbLivenessScore();
                     if (rgbLivenessScore < mRgbLiveScore) {
@@ -467,11 +481,13 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     //获取照片亮度值
                     int bright = getBright(mRBmp);
                     //如果这个值比128大，则这个图片较亮，如果这个值比128小，则这个图比较暗。
-                    if (bright > BRIGHTNESS_VALUE) {
-                        manager.pullDownWhiteLight();
-                    } else if (bright < BRIGHTNESS_VALUE) {
+                    /*if (whiteLight_Status == 0 && bright > BRIGHTNESS_VALUE) {
+                        delayLight();
+                    }*/
+                    if (whiteLight_Status == 0 && bright < BRIGHTNESS_VALUE) {
                         manager.pullUpWhiteLight();
                     }
+
                     Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
                     //压缩照片
                     mRBmp.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
@@ -481,8 +497,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     User user = livenessModel.getUser();
                     if (user == null) {
                         if (livenessModel.getFeatureContrastValue() < 80.00) {
-                            manager.pullDownGreenLight();
-                            manager.pullUpRedLight();
+
+                            if (GreenLight_Status == 1) {
+                                manager.pullDownGreenLight();
+                                GreenLight_Status = 0;
+                            }
+
+//                            manager.pullUpRedLight();
+//                            RedLight_Status = 1;
+                            delayRedLight();
                             //延迟3秒发送给后台图片、特征值
                             delaySendData(livenessModel, imageData, null);
                             //识别失败
@@ -491,8 +514,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                             sendSerialPortData(null);
                         }
                     } else {
-                        manager.pullDownRedLight();
-                        manager.pullUpGreenLight();
+                        if (RedLight_Status == 1) {
+                            manager.pullDownRedLight();
+                            RedLight_Status = 0;
+                        }
+
+                        delayGreenLight();
+//                        manager.pullUpGreenLight();
+//                        GreenLight_Status = 1;
+
 
                         if (faceImage.containsKey(user.getUserName())) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
@@ -518,6 +548,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         });
     }
 
+
     /**
      * 人脸大小过滤
      *
@@ -537,33 +568,44 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         return true;
     }
 
-    /**
-     * 延迟关闭绿灯
-     */
-//    private void delayCloseRedLight() {
-////        if (manager.getRedLightStatus().equals("1")) {
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                manager.pullDownRedLight();
-//            }
-//        }, 3000);
-////        }
-//    }
+    private void delayGreenLight() {
+//        if (manager.getRedLightStatus().equals("1")) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                manager.pullDownWhiteLight();
+                whiteLight_Status = 1;
+                manager.pullUpGreenLight();
+                GreenLight_Status = 1;
+            }
+        }, 200);
+//        }
+    }
 
-    /**
-     *
-     */
-//    private void delayCloseGreenLight() {
-////        if (manager.getGreenLightStatus().equals("1")) {
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                manager.pullDownGreenLight();
-//            }
-//        }, 3000);
-////        }
-//    }
+    private void delayRedLight() {
+//        if (manager.getRedLightStatus().equals("1")) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                manager.pullDownWhiteLight();
+                whiteLight_Status = 1;
+                manager.pullUpRedLight();
+                RedLight_Status = 1;
+            }
+        }, 200);
+//        }
+    }
+
+    private void delayClose_Red_GedreenLight() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                manager.pullDownGreenLight();
+                manager.pullDownRedLight();
+            }
+        }, 200);
+    }
+
 
     /**
      * 延迟3秒发送给后台图片，特征，人名，卡号
@@ -740,7 +782,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
             }
         }
 
-        closeAllLight();
+//        closeAllLight();
+        delayClose_Red_GedreenLight();
         //关闭监听屏幕有没有卡住线程
         timeFlagBool = false;
     }
@@ -748,7 +791,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        closeAllLight();
+//        closeAllLight();
+        delayClose_Red_GedreenLight();
     }
 
     public void setUpDialog() {
