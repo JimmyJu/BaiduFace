@@ -76,6 +76,7 @@ public class TcpService extends Service {
     private final byte[] mRuleHead = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, (byte) 0x55};
     private final byte[] mHeartAdress = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x1d, (byte) 0x00, (byte) 0x01};
     private final byte[] mRegisterAdress = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x21};
+    private final byte[] mRegisterAdress22 = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x22};
     private final byte[] mCheckCode = new byte[]{(byte) 0x00, (byte) 0x00};
     private final byte[] mHeartCategory = new byte[]{(byte) 0x00, (byte) 0x1D};
     private final byte[] mRegisterCategory = new byte[]{(byte) 0x00, (byte) 0x21};
@@ -103,6 +104,8 @@ public class TcpService extends Service {
      * 串口心跳线程标志
      */
     private boolean serialHeartbeatThreadFlag = true;
+
+    private boolean switchPort;
     /**
      * 首页发送次数
      */
@@ -181,6 +184,8 @@ public class TcpService extends Service {
         LiveDataBus.get().with("registerData", byte[].class).observeForever(faceObserver);
         //获取平板关机消息
         LiveDataBus.get().with(BaseConstant.slabShutdownMessage, Integer.class).observeForever(getSlabShutdownMessageObserver);
+
+        LiveDataBus.get().with("switchPort", Boolean.class).observeForever(switchPortObserver);
     }
 
     public class ClientBinder extends Binder {
@@ -679,12 +684,27 @@ public class TcpService extends Service {
         @Override
         public void onChanged(@Nullable byte[] bytes) {
             if (bytes != null) {
-                byte[] sendData = Utils.addBytes(Utils.concat(mRuleHead, mRegisterAdress), bytes, mCheckCode);
-                if (mQueue.size() == mQueueSize) {
-                    mQueue.poll();
+                if (switchPort) {
+                    byte[] sendData = Utils.addBytes(Utils.concat(mRuleHead, mRegisterAdress22), bytes, mCheckCode);
+                    if (mQueue.size() == mQueueSize) {
+                        mQueue.poll();
+                    }
+                    mQueue.offer(sendData);
+                } else {
+                    byte[] sendData = Utils.addBytes(Utils.concat(mRuleHead, mRegisterAdress), bytes, mCheckCode);
+                    if (mQueue.size() == mQueueSize) {
+                        mQueue.poll();
+                    }
+                    mQueue.offer(sendData);
                 }
-                mQueue.offer(sendData);
             }
+        }
+    };
+
+    private final Observer<Boolean> switchPortObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(@Nullable Boolean sw_port) {
+            switchPort = sw_port;
         }
     };
 
@@ -714,5 +734,7 @@ public class TcpService extends Service {
         LiveDataBus.get().with("registerData", byte[].class).removeObserver(faceObserver);
 
         LiveDataBus.get().with(BaseConstant.slabShutdownMessage, Integer.class).removeObserver(getSlabShutdownMessageObserver);
+
+        LiveDataBus.get().with("switchPort",Boolean.class).removeObserver(switchPortObserver);
     }
 }

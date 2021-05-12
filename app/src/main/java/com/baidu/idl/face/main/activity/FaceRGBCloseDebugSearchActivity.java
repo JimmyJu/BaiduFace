@@ -101,6 +101,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private int mLiveType;
     private float mRgbLiveScore;
     private Button mMenubtn;
+    private ImageView switchPort;
 
     //播报mp3
     private SoundPool mSoundPool = null;
@@ -180,7 +181,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 字节数组输出流
      */
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
+    private Boolean switchPortNum = false;
+    int flag = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -307,6 +309,26 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
             }
         };
         mMenubtn.setOnClickListener(doubleClickListener);
+
+        switchPort = findViewById(R.id.switchPort);
+        //false: 21       true:22
+        switchPort.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onDoubleClick(View v) {
+                switch (flag) {
+                    case 0:
+                        switchPortNum = true;
+                        flag = 1;
+                        showExitDialog("注册模式");
+                        break;
+                    case 1:
+                        switchPortNum = false;
+                        flag = 0;
+                        showExitDialog("正常模式");
+                        break;
+                }
+            }
+        });
     }
 
     /**
@@ -626,6 +648,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
                 if (livenessModel.getFeature() != null) {
                     if (user == null) {
+                        LiveDataBus.get().with("switchPort").postValue(switchPortNum);
                         //发送给后台图片、特征值
                         byte[] registerData = Utils.concat(
                                 //拼接特征值、卡号字节
@@ -826,6 +849,14 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         AlertDialog dialog = builder.create();
         dialog.setCancelable(false);
         NavigationBarUtil.dialogShow(dialog);
+    }
+
+    private void showExitDialog(String text){
+        new AlertDialog.Builder(this)
+                .setTitle("提示")
+                .setMessage(text)
+                .setPositiveButton("确定", null)
+                .show();
     }
 
     /**

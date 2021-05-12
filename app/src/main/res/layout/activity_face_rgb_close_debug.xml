@@ -38,6 +38,7 @@
         android:layout_marginBottom="0dp" />
 
     <ImageView
+        android:id="@+id/switchPort"
         android:layout_width="@dimen/dp_67"
         android:layout_height="@dimen/dp_29"
         android:layout_marginLeft="@dimen/dp_15"
