@@ -39,7 +39,6 @@ import com.example.yfaceapi.GPIOManager;
  * 主功能页面，包含人脸检索入口，认证比对，功能设置，授权激活
  */
 public class MainActivity extends BaseActivity {
-    private GPIOManager manager;
     private Context mContext;
     private Boolean isInitConfig;
     private Boolean isConfigExit;

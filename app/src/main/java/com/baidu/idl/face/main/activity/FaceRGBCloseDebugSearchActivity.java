@@ -39,6 +39,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.baidu.idl.face.main.api.Wiegand;
 import com.baidu.idl.face.main.callback.CameraDataCallback;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.camera.AutoTexturePreviewView;
@@ -62,6 +63,7 @@ import com.example.yfaceapi.GPIOManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -74,7 +76,7 @@ import java.util.List;
  */
 public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private GPIOManager manager;
-
+    private Wiegand mWiegand;
     //亮度值
     private static final int BRIGHTNESS_VALUE = 170;
     //补光灯状态
@@ -188,6 +190,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         mContext = this;
 
         manager = GPIOManager.getInstance(FaceRGBCloseDebugSearchActivity.this);
+        mWiegand = Wiegand.getInstance();
 
         initView();
 
@@ -695,6 +698,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 //                                    String ids = new BigInteger(id, 10).toString(16);
                     //crc检验过后，拼接得到需要发送的卡号
                     byte[] crcUuid = Utils.getSendId(Utils.hexString2Bytes(Utils.addZero(user.getUserInfo())));
+                    wiegandOutput34(user.getUserInfo());
                     //发送串口数据
                     LiveDataBus.get().with("SerialData").setValue(crcUuid);
                     LiveDataBus.get().with("SerialData").setValue(Utils.getGreenLightData());
@@ -713,6 +717,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 //                                String ids = new BigInteger(id, 10).toString(16);
                 //crc检验过后，拼接得到需要发送的卡号
                 byte[] crcUuid = Utils.getSendId(Utils.hexString2Bytes(Utils.addZero(user.getUserInfo())));
+                wiegandOutput34(user.getUserInfo());
                 //发送串口数据
                 LiveDataBus.get().with("SerialData").setValue(crcUuid);
                 LiveDataBus.get().with("SerialData").setValue(Utils.getGreenLightData());
@@ -772,6 +777,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mWiegand.release();
         if (SingleBaseConfig.getBaseConfig().getMusicSwitch() == 1) {
 //            mSoundPool.release();
             if (mediaPlayer != null) {
@@ -902,6 +908,20 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 scanLeDevice();
             }
         }, 10 * 3000); //30秒内不可断开、连接重复5次
+    }
+
+
+    /**
+     * 输出韦根34位
+     */
+    private void wiegandOutput34(String id) {
+        try {
+            BigInteger data = new BigInteger(id, 16);
+            int result = mWiegand.output34(data.longValue());
+            Log.i("TAG","Wiegand26 output result:" + result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

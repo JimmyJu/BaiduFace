@@ -17,6 +17,7 @@ import static com.baidu.idl.face.main.activity.FaceMainSearchActivity.PAGE_TYPE;
 public class SettingMainActivity extends BaseActivity implements View.OnClickListener {
     // 如果pageType 为"search","register",页面结束时候返回FaceConfigActivity
     private String pageType;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +43,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         TextView smDetectFollowStarategy = findViewById(R.id.sm_detectfollowstarategy);
         TextView smQualityControl = findViewById(R.id.sm_qualitycontrol);
         TextView smMirror = findViewById(R.id.sm_mirror);
+        TextView smWiegand = findViewById(R.id.sm_wiegand_test);
 
         TextView tvFaceDetectAngle = findViewById(R.id.tv_facedetectangle);
         TextView tvCameraDisplayAngle = findViewById(R.id.tv_cameradisplayangle);
@@ -55,6 +57,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         TextView tvDetectFollowStarategy = findViewById(R.id.tv_detectfollowstarategy);
         TextView tvQualityControl = findViewById(R.id.tv_qualitycontrol);
         TextView tvMirror = findViewById(R.id.tv_mirror);
+        TextView tvWiegand = findViewById(R.id.tv_wiegand_test);
 
         ImageButton smBack = findViewById(R.id.sm_back);
 
@@ -70,6 +73,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         smDetectFollowStarategy.setOnClickListener(this);
         smQualityControl.setOnClickListener(this);
         smMirror.setOnClickListener(this);
+        smWiegand.setOnClickListener(this);
 
         tvFaceDetectAngle.setOnClickListener(this);
         tvCameraDisplayAngle.setOnClickListener(this);
@@ -83,6 +87,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         tvDetectFollowStarategy.setOnClickListener(this);
         tvQualityControl.setOnClickListener(this);
         tvMirror.setOnClickListener(this);
+        tvWiegand.setOnClickListener(this);
 
         smBack.setOnClickListener(this);
     }
@@ -139,6 +144,11 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
                 goActivity(MirrorSettingActivity.class);
                 break;
 
+            case R.id.sm_wiegand_test:
+                //韦根测试
+                goActivity(WiegandActivity.class);
+                break;
+
             case R.id.tv_facedetectangle:
                 // 人脸检测角度设置
                 goActivity(FaceDetectAngleActivity.class);
@@ -186,7 +196,11 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
                 // 进入镜像调节页面
                 goActivity(MirrorSettingActivity.class);
                 break;
-
+            case R.id.tv_wiegand_test:
+                //韦根测试
+                goActivity(WiegandActivity.class);
+                break;
+                
             case R.id.sm_back:
                 finish();
                 break;

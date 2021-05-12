@@ -23,6 +23,8 @@
 #include <linux/watchdog.h>
 #include <jni.h>
 #include <android/log.h>
+#include <unistd.h>
+#include <string.h>
 
 #define DEVICE_WG_INPUT "/dev/wiegand_input"
 #define DEVICE_WG_OUTPUT "/dev/wiegand_output"
@@ -46,7 +48,6 @@ static int fd_output = -1;
 unsigned char wg_output_buff[4];
 unsigned short wg_hid;
 unsigned short wg_pid;
-
 
 #ifndef _Included_com_baidu_idl_face_main_api_Wiegand
 #define _Included_com_baidu_idl_face_main_api_Wiegand
