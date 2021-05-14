@@ -78,7 +78,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private GPIOManager manager;
     private Wiegand mWiegand;
     //亮度值
-    private static final int BRIGHTNESS_VALUE = 170;
+    private static final int BRIGHTNESS_VALUE = 128;
     //补光灯状态
     private int whiteLight_Status = 0;
     private int RedLight_Status = 0;
@@ -181,6 +181,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 字节数组输出流
      */
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+    //切换寄存器地址 false: 21       true:22(需要注册的)
     private Boolean switchPortNum = false;
     int flag = 0;
 
@@ -456,9 +458,9 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Log.e("bright", "白色补光的状态是: " + manager.getWhiteLightStatus()
+               /* Log.e("bright", "白色补光的状态是: " + manager.getWhiteLightStatus()
                         + "绿色补光的状态是: " + manager.getGreenLightStatus()
-                        + "红色补光的状态是: " + manager.getRedLightStatus());
+                        + "红色补光的状态是: " + manager.getRedLightStatus());*/
 
                 if (livenessModel == null || livenessModel.getFaceInfo() == null || !faceSizeFilter(livenessModel.getFaceInfo(), width, height)) {
                     //隐藏识别成功、失败窗口
@@ -721,7 +723,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 //                                    String ids = new BigInteger(id, 10).toString(16);
                     //crc检验过后，拼接得到需要发送的卡号
                     byte[] crcUuid = Utils.getSendId(Utils.hexString2Bytes(Utils.addZero(user.getUserInfo())));
-                    wiegandOutput34(user.getUserInfo());
+                    //韦根输出
+                    wiegandOutput34(Utils.addZero(user.getUserInfo()));
                     //发送串口数据
                     LiveDataBus.get().with("SerialData").setValue(crcUuid);
                     LiveDataBus.get().with("SerialData").setValue(Utils.getGreenLightData());
@@ -740,7 +743,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 //                                String ids = new BigInteger(id, 10).toString(16);
                 //crc检验过后，拼接得到需要发送的卡号
                 byte[] crcUuid = Utils.getSendId(Utils.hexString2Bytes(Utils.addZero(user.getUserInfo())));
-                wiegandOutput34(user.getUserInfo());
+                //韦根输出
+                wiegandOutput34(Utils.addZero(user.getUserInfo()));
                 //发送串口数据
                 LiveDataBus.get().with("SerialData").setValue(crcUuid);
                 LiveDataBus.get().with("SerialData").setValue(Utils.getGreenLightData());

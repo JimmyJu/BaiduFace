@@ -14,6 +14,10 @@ public class Wiegand {
         return instance;
     }
 
+    private Wiegand() {
+
+    }
+
     /**
      * 韦根26输出
      *

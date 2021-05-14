@@ -31,7 +31,7 @@ public class WiegandActivity extends BaseActivity implements View.OnClickListene
         edit34 = findViewById(R.id.output_wiegand34);
         bt26 = findViewById(R.id.output_bt_26);
         bt34 = findViewById(R.id.output_bt_34);
-        mWiegand = new Wiegand();
+        mWiegand = Wiegand.getInstance();
 
         bt26.setOnClickListener(this);
         bt34.setOnClickListener(this);
@@ -47,7 +47,7 @@ public class WiegandActivity extends BaseActivity implements View.OnClickListene
     public void onClick(View v) {
         if (v == bt26) {
             try {
-                int result = mWiegand.output26(Long.parseLong("121212"));
+                int result = mWiegand.output26(Long.parseLong(edit26.getText().toString()));
                 Log.i(TAG, "Wiegand26 output result:" + result);
             } catch (Exception e) {
                 e.printStackTrace();
