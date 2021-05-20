@@ -55,6 +55,7 @@ import com.baidu.idl.face.main.utils.DensityUtils;
 import com.baidu.idl.face.main.utils.FaceOnDrawTexturViewUtil;
 import com.baidu.idl.face.main.utils.LiveDataBus;
 import com.baidu.idl.face.main.utils.NavigationBarUtil;
+import com.baidu.idl.face.main.utils.ToastUtils;
 import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.face.main.view.DoubleClickListener;
 import com.baidu.idl.facesdkdemo.R;
@@ -199,7 +200,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         initView();
 
         //监听时间戳，获取被赋值的时间比当前时间小于1秒，说明屏幕卡住不动了
-//        monitorTimestamp();
+        monitorTimestamp();
 
         //监听状态灯
 //        checkLightState();
@@ -837,12 +838,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 .setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                       /* if (edit_username.getText().toString().length() ==0 ||edit_password.getText().toString().length() ==0){
-                            showSafe("账号或密码不能为空!");
-                        }else {*/
-                        startActivity(new Intent(mContext, FaceMainSearchActivity.class));
-                        finish();
-                        // }
+                        if (etUsername.getText().toString().length() == 0 || etPassword.getText().toString().length() == 0) {
+                            ToastUtils.toast(getApplicationContext(),"账号或密码不能为空!");
+                        } else if (etUsername.getText().toString().equals("Admin")
+                                && etPassword.getText().toString().equals("123456")) {
+                            startActivity(new Intent(mContext, FaceMainSearchActivity.class));
+                            finish();
+                        } else {
+                            ToastUtils.toast(getApplicationContext(),"账号或密码不正确!");
+                        }
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
@@ -855,7 +859,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         NavigationBarUtil.dialogShow(dialog);
     }
 
-    private void showExitDialog(String text){
+    private void showExitDialog(String text) {
         new AlertDialog.Builder(this)
                 .setTitle("提示")
                 .setMessage(text)
@@ -953,7 +957,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         try {
             BigInteger data = new BigInteger(id, 16);
             int result = mWiegand.output34(data.longValue());
-            Log.i("TAG","Wiegand26 output result:" + result);
+            Log.i("TAG", "Wiegand26 output result:" + result);
         } catch (Exception e) {
             e.printStackTrace();
         }

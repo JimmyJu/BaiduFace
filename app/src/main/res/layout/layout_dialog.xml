@@ -7,12 +7,14 @@
     <EditText
         android:id="@+id/username"
         android:hint="请输入用户名"
+        android:text="Admin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/password"
         android:hint="请输入密码"
+        android:inputType="numberPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
