@@ -8,6 +8,9 @@
         android:id="@+id/username"
         android:hint="请输入用户名"
         android:text="Admin"
+        android:lines="1"
+        android:inputType="text"
+        android:textSize="@dimen/sp_15"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -16,6 +19,7 @@
         android:hint="请输入密码"
         android:inputType="numberPassword"
         android:layout_width="match_parent"
+        android:textSize="@dimen/sp_15"
         android:layout_height="wrap_content" />
 
 </LinearLayout>

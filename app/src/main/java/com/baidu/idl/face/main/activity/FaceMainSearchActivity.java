@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 
-import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
 import com.baidu.idl.facesdkdemo.R;
 import com.example.yfaceapi.GPIOManager;
@@ -20,6 +19,7 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
     public static final int PAGE_TYPE = 999;
     GPIOManager manager;
     private Handler handler = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,5 +85,10 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
                 manager.pullDownWhiteLight();
             }
         }, 2000);
+    }
+
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
     }
 }

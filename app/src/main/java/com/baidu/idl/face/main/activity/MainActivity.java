@@ -348,4 +348,8 @@ public class MainActivity extends BaseActivity {
         GPIOManager.getInstance(this).pullDownWhiteLight();
     }
 
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
+    }
 }

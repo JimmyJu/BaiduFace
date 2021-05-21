@@ -1003,6 +1003,10 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         manager.pullDownGreenLight();
     }
 
+    @Override
+    public void onBackPressed() {
+//        super.onBackPressed();
+    }
 
     private final ScanCallback scanCallback = new ScanCallback() {
         @Override

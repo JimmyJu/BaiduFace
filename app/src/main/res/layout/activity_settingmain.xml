@@ -13,12 +13,12 @@
         <RelativeLayout
             android:background="@color/bg_color"
             android:layout_width="match_parent"
-            android:layout_height="60dp">
+            android:layout_height="@dimen/dp_44">
 
             <ImageButton
                 android:id="@+id/sm_back"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="@dimen/dp_22"
+                android:layout_height="@dimen/dp_22"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
