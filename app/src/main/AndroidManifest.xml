@@ -62,8 +62,11 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <!-- 添加Launcher配置 -->
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
 
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- 人脸注册 -->
@@ -194,7 +197,7 @@
         <service
             android:name="com.baidu.idl.face.main.service.TcpService"
             android:enabled="true"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <meta-data
             android:name="seckey_avscan"

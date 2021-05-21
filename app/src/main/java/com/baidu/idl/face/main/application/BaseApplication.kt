@@ -4,8 +4,8 @@ import android.app.Application
 import android.util.Log
 import com.baidu.idl.face.main.utils.AppStateMonitor
 import com.baidu.idl.face.main.utils.AppStateMonitor.AppStateChangeListener
+import com.example.yfaceapi.GPIOManager
 import com.tencent.bugly.crashreport.CrashReport
-import java.util.*
 
 /**
  * @Date: 2020/4/20 17:30
@@ -28,6 +28,8 @@ class BaseApplication : Application() {
             override fun appTurnIntoBackGround() {
                 // app处理到到后台的逻辑
                 Log.e("tag", "App - 处于后台")
+                GPIOManager.getInstance(applicationContext).pullDownRedLight()
+                GPIOManager.getInstance(applicationContext).pullDownGreenLight()
             }
         })
     }
