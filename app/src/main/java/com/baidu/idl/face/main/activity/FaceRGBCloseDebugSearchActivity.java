@@ -165,7 +165,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private TextView tvName;
     private TextView tvDiscernFailure;
     /**
-     * 底部状态View
+     * 底部状态View 活体检测、识别通过、识别未通过、发送信息、服务器状态
      */
     private TextView mLiveTextView, mAdoptTextView, mErrorTextView, mSendTextView, mServerStateTextView;
     private int mLiveNum, mAdoptNum, mErrorNum;
