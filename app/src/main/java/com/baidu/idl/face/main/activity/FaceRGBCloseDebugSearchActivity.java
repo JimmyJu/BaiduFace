@@ -229,7 +229,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         }
 
         //扫描BLE设备
-        scanLeDevice();
+//        scanLeDevice();
 
         //接收数据
         liveDataBus();
