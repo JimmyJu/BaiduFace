@@ -45,6 +45,17 @@
         android:layout_marginTop="@dimen/dp_15"
         android:src="@mipmap/logo" />
 
+    <TextView
+        android:id="@+id/tvDeviceID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_15"
+        android:textColor="#2196F3"
+        android:layout_marginBottom="@dimen/dp_40"
+        android:layout_alignParentBottom="true"
+
+        />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

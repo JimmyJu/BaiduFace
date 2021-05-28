@@ -55,6 +55,7 @@ import com.baidu.idl.face.main.utils.DensityUtils;
 import com.baidu.idl.face.main.utils.FaceOnDrawTexturViewUtil;
 import com.baidu.idl.face.main.utils.LiveDataBus;
 import com.baidu.idl.face.main.utils.NavigationBarUtil;
+import com.baidu.idl.face.main.utils.NetWorkUtils;
 import com.baidu.idl.face.main.utils.ToastUtils;
 import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.face.main.view.DoubleClickListener;
@@ -198,6 +199,8 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         mWiegand = Wiegand.getInstance();
 
         initView();
+
+        getDevicesNum();
 
         //监听时间戳，获取被赋值的时间比当前时间小于1秒，说明屏幕卡住不动了
         monitorTimestamp();
@@ -1006,6 +1009,17 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
 //        super.onBackPressed();
+    }
+
+    public void getDevicesNum() {
+        String ip = NetWorkUtils.getLocalIpAddress();
+        if (ip != null && !ip.equals("")) {
+            String newIP = ip.replace(".", "");
+            String deviceID = newIP.substring(newIP.length() - 6);
+            TextView tvDeviceID = findViewById(R.id.tvDeviceID);
+            tvDeviceID.setText("设备ID：" + deviceID);
+            Log.d("TAG", "onCreate: 设备ID" + deviceID);
+        }
     }
 
     private final ScanCallback scanCallback = new ScanCallback() {
