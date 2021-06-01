@@ -17,6 +17,7 @@ import com.baidu.idl.face.main.manager.UserInfoManager;
 import com.baidu.idl.face.main.model.ProgressList;
 import com.baidu.idl.face.main.utils.LiveDataBus;
 import com.baidu.idl.face.main.utils.NetWorkUtils;
+import com.baidu.idl.face.main.utils.SPUtils;
 import com.baidu.idl.face.main.utils.Utils;
 
 import java.io.BufferedInputStream;
@@ -163,6 +164,10 @@ public class TcpService extends Service {
      */
     ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
 
+    private String ip = "192.168.1.201";
+    private String port = "8099";
+
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -210,10 +215,19 @@ public class TcpService extends Service {
         @Override
         public void run() {
             try {
+                String ed_ip = (String) SPUtils.get(getApplicationContext(), "IP", "");
+                String ed_port = (String) SPUtils.get(getApplicationContext(), "PORT", "");
+                if (!ed_ip.isEmpty() && !ed_port.isEmpty()) {
+                    ip = ed_ip;
+                    port = ed_port;
+                }
+                SPUtils.put(getApplicationContext(),"IP",ip);
+                SPUtils.put(getApplicationContext(),"PORT",port);
+                Log.e(TAG, "run--------: " + ip + ":" + port);
                 // 建立Socket连接
                 if (mSocket == null) {
                     mSocket = new Socket();
-                    mSocket.connect(new InetSocketAddress("192.168.1.201", 8099), 10);
+                    mSocket.connect(new InetSocketAddress(ip, Integer.parseInt(port)), 10);
                     mBis = new BufferedInputStream(mSocket.getInputStream());
                     mBos = new BufferedOutputStream(mSocket.getOutputStream());
                     //发送设备ID
@@ -735,6 +749,6 @@ public class TcpService extends Service {
 
         LiveDataBus.get().with(BaseConstant.slabShutdownMessage, Integer.class).removeObserver(getSlabShutdownMessageObserver);
 
-        LiveDataBus.get().with("switchPort",Boolean.class).removeObserver(switchPortObserver);
+        LiveDataBus.get().with("switchPort", Boolean.class).removeObserver(switchPortObserver);
     }
 }

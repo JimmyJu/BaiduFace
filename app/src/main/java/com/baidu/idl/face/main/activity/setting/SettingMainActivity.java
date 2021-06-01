@@ -9,8 +9,6 @@ import android.widget.TextView;
 import com.baidu.idl.face.main.activity.BaseActivity;
 import com.baidu.idl.facesdkdemo.R;
 
-import static com.baidu.idl.face.main.activity.FaceMainSearchActivity.PAGE_TYPE;
-
 /**
  * description :功能设置界面
  */
@@ -44,6 +42,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         TextView smQualityControl = findViewById(R.id.sm_qualitycontrol);
         TextView smMirror = findViewById(R.id.sm_mirror);
         TextView smWiegand = findViewById(R.id.sm_wiegand_test);
+        TextView smIp = findViewById(R.id.sm_ip);
 
         TextView tvFaceDetectAngle = findViewById(R.id.tv_facedetectangle);
         TextView tvCameraDisplayAngle = findViewById(R.id.tv_cameradisplayangle);
@@ -58,6 +57,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         TextView tvQualityControl = findViewById(R.id.tv_qualitycontrol);
         TextView tvMirror = findViewById(R.id.tv_mirror);
         TextView tvWiegand = findViewById(R.id.tv_wiegand_test);
+        TextView tvIp = findViewById(R.id.tv_ip);
 
         ImageButton smBack = findViewById(R.id.sm_back);
 
@@ -74,6 +74,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         smQualityControl.setOnClickListener(this);
         smMirror.setOnClickListener(this);
         smWiegand.setOnClickListener(this);
+        smIp.setOnClickListener(this);
 
         tvFaceDetectAngle.setOnClickListener(this);
         tvCameraDisplayAngle.setOnClickListener(this);
@@ -88,6 +89,7 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         tvQualityControl.setOnClickListener(this);
         tvMirror.setOnClickListener(this);
         tvWiegand.setOnClickListener(this);
+        tvIp.setOnClickListener(this);
 
         smBack.setOnClickListener(this);
     }
@@ -149,6 +151,11 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
                 goActivity(WiegandActivity.class);
                 break;
 
+            case R.id.sm_ip:
+                //服务器地址修改
+                goActivity(IpAddressActivity.class);
+                break;
+
             case R.id.tv_facedetectangle:
                 // 人脸检测角度设置
                 goActivity(FaceDetectAngleActivity.class);
@@ -200,7 +207,12 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
                 //韦根测试
                 goActivity(WiegandActivity.class);
                 break;
-                
+
+            case R.id.tv_ip:
+                //服务器地址修改
+                goActivity(IpAddressActivity.class);
+                break;
+
             case R.id.sm_back:
                 finish();
                 break;

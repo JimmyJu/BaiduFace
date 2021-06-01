@@ -54,6 +54,9 @@
         android:label="@string/app_name"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name="com.baidu.idl.face.main.activity.setting.IpAddressActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
             android:name="com.baidu.idl.face.main.activity.setting.WiegandActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <!-- 主页面 -->
@@ -62,44 +65,46 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
+
                 <!-- 添加Launcher配置 -->
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- 人脸注册 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceRegisterActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 人脸注册预览页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 人脸注册预览页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceRGBRegisterActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceMainSearchActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 设备激活（在线激活、离线激活）页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 设备激活（在线激活、离线激活）页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceAuthActicity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 组列表信息页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 组列表信息页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceUserGroupListActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 用户列表信息页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 用户列表信息页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceUserListActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 用户信息页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 用户信息页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceUserInfoActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceRGBCloseDebugSearchActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.baidu.idl.face.main.activity.FaceAttributeRGBActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity> <!-- 功能设置页面 -->
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 功能设置页面 -->
         <activity
             android:name="com.baidu.idl.face.main.activity.setting.SettingMainActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.baidu.idl.face.main.activity.setting.CameraDisplayAngleActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />

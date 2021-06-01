@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:text="IP："
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_18" />
+
+    <EditText
+        android:id="@+id/ed_ip"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:background="#F2F2F2"
+        android:gravity="center"
+        android:hint="输入IP"
+        android:inputType="textUri"
+        android:textSize="@dimen/sp_18"
+        tools:text="192.1681.108" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:text="PORT："
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_18" />
+
+    <EditText
+        android:id="@+id/ed_port"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_44"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:background="#F2F2F2"
+        android:gravity="center"
+        android:hint="输入PORT"
+        android:inputType="number"
+        android:textSize="@dimen/sp_18"
+        tools:text="8900" />
+
+</LinearLayout>
