@@ -519,7 +519,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                         manager.pullUpWhiteLight();
                     }
 
-                    Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
+//                    Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
                     //压缩照片
                     mRBmp.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
                     byte[] imageData = Utils.addBytes(imageHead, byteArrayOutputStream.toByteArray(), imageEnd);
@@ -960,7 +960,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         try {
             BigInteger data = new BigInteger(id, 16);
             int result = mWiegand.output34(data.longValue());
-            Log.i("TAG", "Wiegand26 output result:" + result);
+            Log.i("TAG", "Wiegand34 output result:" + result);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -974,7 +974,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 如果这个值比128大，则这个图片较亮，如果这个值比128小，则这个图比较暗。
      */
     private int getBright(Bitmap bm) {
-        Log.d("TAG", "getBright start");
+//        Log.d("TAG", "getBright start");
         if (bm == null) return -1;
         int width = bm.getWidth();
         int height = bm.getHeight();
@@ -984,7 +984,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         count = width * height;
         int[] buffer = new int[width * height];
         bm.getPixels(buffer, 0, width, 0, 0, width, height);
-        Log.d("TAG", "width:" + width + ",height:" + height);
+//        Log.d("TAG", "width:" + width + ",height:" + height);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 int localTemp = buffer[j * width + i];//bm.getPixel(i, j);
@@ -994,7 +994,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 bright = (int) (bright + 0.299 * r + 0.587 * g + 0.114 * b);
             }
         }
-        Log.d("TAG", "getBright end");
+//        Log.d("TAG", "getBright end");
         return bright / count;
 
     }
