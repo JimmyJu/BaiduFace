@@ -83,6 +83,13 @@ public class TcpService extends Service {
     private final byte[] mRegisterCategory = new byte[]{(byte) 0x00, (byte) 0x21};
     private final byte[] mFaceLibCategory = new byte[]{(byte) 0x00, (byte) 0x1B};
     private final byte[] mRequestFaceLib = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, (byte) 0x55, (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x1B, (byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00};
+
+    private final byte[] mAddResponse = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, 0x55, 0x00, 0x10, 0x00, 0x15};
+    private final byte[] mok = new byte[]{0x4F, 0x4B, 0x00, 0x00};
+
+    private final byte[] mDeleteResponse = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, 0x55, 0x00, 0x10, 0x00, 0x35};
+    private final byte[] mDeleteOk = new byte[]{0x4F, 0x4B, 0x00, 0x00};
+
     /**
      * 队列大小
      */
@@ -162,7 +169,12 @@ public class TcpService extends Service {
     /**
      * 单个线程池
      */
+    //特征库
     ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+    //删除人员
+    ExecutorService singleThreadExecutor1 = Executors.newSingleThreadExecutor();
+    //新增
+    ExecutorService singleThreadExecutor2 = Executors.newSingleThreadExecutor();
 
     private String ip = "192.168.1.201";
     private String port = "8099";
@@ -221,8 +233,8 @@ public class TcpService extends Service {
                     ip = ed_ip;
                     port = ed_port;
                 }
-                SPUtils.put(getApplicationContext(),"IP",ip);
-                SPUtils.put(getApplicationContext(),"PORT",port);
+                SPUtils.put(getApplicationContext(), "IP", ip);
+                SPUtils.put(getApplicationContext(), "PORT", port);
                 Log.e(TAG, "run--------: " + ip + ":" + port);
                 // 建立Socket连接
                 if (mSocket == null) {
@@ -331,9 +343,90 @@ public class TcpService extends Service {
                             mHandler.postDelayed(disConnectRunnable, 25000);
                             Log.d(TAG, "我收到来自服务器的消息: " + data + "--计数" + dataNum);
                         }
-                    } else if (size == 18) { // size == 18说明是收到删除人员信息
-                        registerStartAddress(buffer, size);
-                    } else if (size > 14) {
+                    }
+//                    else if (size == 19) { // size == 18说明是收到删除人员信息
+//                        byte[] infoCode = new byte[1];
+//                        System.arraycopy(buffer, 10, infoCode, 0, 1);
+//                        mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+//                        registerStartAddress(buffer, size);
+//                    }
+                    else if (size > 14) {
+                        //起始地址
+                        byte[] category = new byte[2];
+                        System.arraycopy(buffer, 8, category, 0, 2);
+
+//                        //获取标识码
+//                        byte[] infoCode = new byte[1];
+//                        System.arraycopy(buffer, 10, infoCode, 0, 1);
+                        //删除
+                        if (Arrays.equals(category, mRemoveStaffCategory)) {
+                            //获取标识码
+                            byte[] infoCode = new byte[1];
+                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+
+
+                            //获取后台返回最后两位字节
+                            byte[] checkByte = new byte[2];
+                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+                            //检验是不是完整的包
+                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+                                newByte = buffer;
+                            } else {
+                                if ((size - 15) % 4 == 0) { //没有余数说明是完整的包
+
+                                    removeStaff(buffer, size);
+                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+
+                                } else {
+                                    //合并两个byte数组
+                                    byte[] concatByte = Utils.concat(newByte, buffer);
+
+                                    removeStaff(buffer, size);
+                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+
+                                }
+                            }
+
+
+//                            removeStaff(buffer, size);
+//                            mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+                            //新增
+                        } else if (Arrays.equals(category, mNewStaffCategory)) {
+                            //获取标识码
+                            byte[] infoCode = new byte[1];
+                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+
+
+                            //获取后台返回最后两位字节
+                            byte[] checkByte = new byte[2];
+                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+                            //检验是不是完整的包
+                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+                                newByte = buffer;
+                            } else {
+                                if ((size - 15) % 526 == 0) { //没有余数说明是完整的包
+
+                                    addStaff(buffer, size);
+                                    FaceApi.getInstance().initDatabases(true);
+                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+
+                                } else {
+                                    //合并两个byte数组
+                                    byte[] concatByte = Utils.concat(newByte, buffer);
+
+                                    addStaff(buffer, size);
+                                    FaceApi.getInstance().initDatabases(true);
+                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+
+                                }
+                            }
+
+
+//                            addStaff(buffer, size);
+//                            FaceApi.getInstance().initDatabases(true);
+//                            mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+                        }
+
                         //获取后台返回最后两位字节
                         byte[] checkByte = new byte[2];
                         System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
@@ -343,10 +436,12 @@ public class TcpService extends Service {
                         } else {
                             if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
                                 registerStartAddress(buffer, size);
+
                             } else {
                                 //合并两个byte数组
                                 byte[] concatByte = Utils.concat(newByte, buffer);
                                 registerStartAddress(concatByte, concatByte.length);
+
                             }
                         }
                     }
@@ -369,7 +464,6 @@ public class TcpService extends Service {
 
         byte[] category = new byte[2];
         System.arraycopy(buffer, 8, category, 0, 2);
-
         //脸探头设备人员注册 寄存器起始地址
         if (Arrays.equals(category, mRegisterCategory)) {
             LiveDataBus.get().with("registerFlag").postValue(true);
@@ -389,14 +483,14 @@ public class TcpService extends Service {
             onRegister(buffer, size);
         }
         //新增人员 寄存器起始地址
-        else if (Arrays.equals(category, mNewStaffCategory)) {
-            onRegister(buffer, size);
-            FaceApi.getInstance().initDatabases(true);
-        }
-        //删除人员 寄存器起始地址
-        else if (Arrays.equals(category, mRemoveStaffCategory)) {
-            removeStaff(buffer);
-        }
+//        else if (Arrays.equals(category, mNewStaffCategory)) {
+//            onRegister(buffer, size);
+//            FaceApi.getInstance().initDatabases(true);
+//        }
+//        //删除人员 寄存器起始地址
+//        else if (Arrays.equals(category, mRemoveStaffCategory)) {
+//            removeStaff(buffer);
+//        }
     }
 
 
@@ -515,14 +609,148 @@ public class TcpService extends Service {
     }
 
     /**
+     * 新增人员
+     *
+     * @param data
+     * @param size
+     */
+    private void addStaff(byte[] data, int size) {
+        singleThreadExecutor2.execute(new Runnable() {
+            @Override
+            public void run() {
+                //人员信息字节长度
+                int personnelInfoSize = size - 15;
+                for (int i = 1; i <= personnelInfoSize / 526; i++) {
+                    byte[] personnelInfoByte = new byte[personnelInfoSize];
+                    System.arraycopy(data, 13, personnelInfoByte, 0, personnelInfoSize);
+
+                    int j = personnelInfoSize / (personnelInfoSize / 526);
+
+                    byte[] featureByte = new byte[512];
+
+                    byte[] cardByte = new byte[4];
+
+                    byte[] nameByte = new byte[10];
+
+                    if (i == 1) {
+                        //人脸信息
+                        System.arraycopy(personnelInfoByte, 0, featureByte, 0, 512);
+                        //卡号
+                        System.arraycopy(personnelInfoByte, j * i - 14, cardByte, 0, 4);
+                        //人名
+                        System.arraycopy(personnelInfoByte, j * i - 10, nameByte, 0, 10);
+                    } else {
+                        //人脸信息
+                        if (j * (i - 1) <= personnelInfoSize) {
+                            System.arraycopy(personnelInfoByte, j * (i - 1), featureByte, 0, 512);
+                        }
+                        //卡号
+                        System.arraycopy(personnelInfoByte, j * (i - 1) + 512, cardByte, 0, 4);
+                        //人名
+                        System.arraycopy(personnelInfoByte, j * (i - 1) + 516, nameByte, 0, 10);
+                    }
+                    //卡号
+                    String card = Utils.byteToHex(cardByte);
+
+                    //人名
+                    String username = null;
+                    try {
+                        username = new String(nameByte, "GB2312");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+
+                    //添加到数据库中
+                    isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
+                    if (isSuccess) {
+                        success++;
+                    }
+                }
+                Log.e(TAG, "add: " + success);
+                progressList.setProgress(progressFlag);
+                progressList.setFaceLibNum(inTotalInfo);
+                progressList.setSuccess(success);
+                LiveDataBus.get().with("progressData").postValue(progressList);
+                progressFlag = true;
+            }
+        });
+    }
+/*
+    public static void main(String[] args) {
+        byte [] aa = {(byte) 0xFE,(byte) 0xFE,(byte) 0xFE,(byte) 0xFE,(byte) 0xAA,0x55,0x00,0x10,0x00,0x35,0x00,0x00,0x01,0x00,0x10,0x10,0x10,0x11,0x21,0x21,0x00,0x00,0x00};
+        int cardInfoSize = aa.length - 15;
+        for (int i = 1; i <= cardInfoSize / 4; i++) {
+            byte[] cardBytes = new byte[cardInfoSize];
+            System.arraycopy(aa, 13, cardBytes, 0, cardInfoSize);
+            int j = cardInfoSize / (cardInfoSize / 4);
+            byte[] cardByte = new byte[4];
+            if (i == 1) {
+                System.arraycopy(cardBytes, 0, cardByte, 0, 4);
+            } else {
+                if (j * (i - 1) <= cardInfoSize) {
+                    System.arraycopy(cardBytes, j * (i - 1), cardByte, 0, 4);
+                }
+            }
+
+            String card = Utils.byteToHex(cardByte);
+            System.out.println("removeStaff: 卡号：" + card);
+//            Log.e(TAG, "removeStaff: 卡号：" + card);
+        }
+    }*/
+
+    /**
      * 删除人员
      *
      * @param data 删除人员数据
      */
-    private void removeStaff(byte[] data) {
-        //卡号
+    private void removeStaff(byte[] data, int size) {
+
+        singleThreadExecutor1.execute(new Runnable() {
+            @Override
+            public void run() {
+                //卡号字节长度
+                int cardInfoSize = size - 15;
+                for (int i = 1; i <= cardInfoSize / 4; i++) {
+                    byte[] cardBytes = new byte[cardInfoSize];
+                    System.arraycopy(data, 13, cardBytes, 0, cardInfoSize);
+                    int j = cardInfoSize / (cardInfoSize / 4);
+                    byte[] cardByte = new byte[4];
+                    if (i == 1) {
+                        System.arraycopy(cardBytes, 0, cardByte, 0, 4);
+                    } else {
+                        if (j * (i - 1) <= cardInfoSize) {
+                            System.arraycopy(cardBytes, j * (i - 1), cardByte, 0, 4);
+                        }
+                    }
+
+                    String card = Utils.byteToHex(cardByte);
+                    Log.e(TAG, "removeStaff: 卡号：" + card);
+
+                    //删除单个用户信息
+                    UserInfoManager.getInstance().deleteUserInfo(card);
+                    UserInfoManager.getInstance().setRemoveStaffCallback(new RemoveStaffCallback() {
+                        @Override
+                        public void removeStaffSuccess() {
+                            Log.e("TAG", "removeStaffSuccess: 成功");
+                            // 数据变化，更新内存
+                            FaceApi.getInstance().initDatabases(true);
+                        }
+
+                        @Override
+                        public void removeStaffFailure() {
+                            Log.e("TAG", "removeStaffFailure: 失败");
+                        }
+                    });
+
+                }
+
+            }
+        });
+
+
+     /*   //卡号
         byte[] cardByte = new byte[4];
-        System.arraycopy(data, 12, cardByte, 0, 4);
+        System.arraycopy(data, 13, cardByte, 0, 4);
         //卡号
         String card = Utils.byteToHex(cardByte);
         Log.e(TAG, "removeStaff: 卡号：" + card);
@@ -541,7 +769,7 @@ public class TcpService extends Service {
             public void removeStaffFailure() {
                 Log.e("TAG", "removeStaffFailure: 失败");
             }
-        });
+        });*/
     }
 
     @SuppressWarnings({"BusyWait", "InfiniteLoopStatement"})
