@@ -381,7 +381,7 @@ public class TcpService extends Service {
                                     //合并两个byte数组
                                     byte[] concatByte = Utils.concat(newByte, buffer);
 
-                                    removeStaff(buffer, size);
+                                    removeStaff(concatByte, concatByte.length);
                                     mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
 
                                 }
@@ -414,7 +414,7 @@ public class TcpService extends Service {
                                     //合并两个byte数组
                                     byte[] concatByte = Utils.concat(newByte, buffer);
 
-                                    addStaff(buffer, size);
+                                    addStaff(concatByte, concatByte.length);
                                     FaceApi.getInstance().initDatabases(true);
                                     mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
 
@@ -425,25 +425,28 @@ public class TcpService extends Service {
 //                            addStaff(buffer, size);
 //                            FaceApi.getInstance().initDatabases(true);
 //                            mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
-                        }
-
-                        //获取后台返回最后两位字节
-                        byte[] checkByte = new byte[2];
-                        System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
-                        //检验是不是完整的包
-                        if (!Utils.byteToHex(checkByte).equals("0000")) {
-                            newByte = buffer;
-                        } else {
-                            if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
-                                registerStartAddress(buffer, size);
-
+                            //获取特征库
+                        } else if (Arrays.equals(category, mFaceLibCategory)) {
+                            //获取后台返回最后两位字节
+                            byte[] checkByte = new byte[2];
+                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+                            //检验是不是完整的包
+                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+                                newByte = buffer;
                             } else {
-                                //合并两个byte数组
-                                byte[] concatByte = Utils.concat(newByte, buffer);
-                                registerStartAddress(concatByte, concatByte.length);
+                                if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
+                                    registerStartAddress(buffer, size);
 
+                                } else {
+                                    //合并两个byte数组
+                                    byte[] concatByte = Utils.concat(newByte, buffer);
+                                    registerStartAddress(concatByte, concatByte.length);
+
+                                }
                             }
+
                         }
+
                     }
                 }
             } catch (Exception e) {
@@ -462,14 +465,15 @@ public class TcpService extends Service {
      */
     private void registerStartAddress(byte[] buffer, int size) {
 
-        byte[] category = new byte[2];
-        System.arraycopy(buffer, 8, category, 0, 2);
-        //脸探头设备人员注册 寄存器起始地址
-        if (Arrays.equals(category, mRegisterCategory)) {
-            LiveDataBus.get().with("registerFlag").postValue(true);
-        }
-        //获取特征库 寄存器起始地址
-        else if (Arrays.equals(category, mFaceLibCategory)) {
+//        byte[] category = new byte[2];
+//        System.arraycopy(buffer, 8, category, 0, 2);
+//        //脸探头设备人员注册 寄存器起始地址
+//        if (Arrays.equals(category, mRegisterCategory)) {
+//            LiveDataBus.get().with("registerFlag").postValue(true);
+//        }
+//        //获取特征库 寄存器起始地址
+//        else if (Arrays.equals(category, mFaceLibCategory)) {
+
             byte[] faceNumByte = new byte[2];
             System.arraycopy(buffer, 10, faceNumByte, 0, 2);
             //寄存器数量
@@ -481,7 +485,9 @@ public class TcpService extends Service {
             }
             //获取后台人脸特征库
             onRegister(buffer, size);
-        }
+
+
+//        }
         //新增人员 寄存器起始地址
 //        else if (Arrays.equals(category, mNewStaffCategory)) {
 //            onRegister(buffer, size);
