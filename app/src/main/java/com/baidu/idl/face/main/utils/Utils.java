@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.math.BigInteger;
 import java.text.DateFormat;
@@ -415,6 +414,27 @@ public class Utils {
         }
         return bytes;
     }
+
+    /**
+     * 合并多个字节数组到一个字节数组
+     *
+     * @param values 动态字节数字参数
+     * @return byte[] 合并后的字节数字
+     */
+    public static byte[] mergeBytes(byte[]... values) {
+        int lengthByte = 0;
+        for (byte[] value : values) {
+            lengthByte += value.length;
+        }
+        byte[] allBytes = new byte[lengthByte];
+        int countLength = 0;
+        for (byte[] b : values) {
+            System.arraycopy(b, 0, allBytes, countLength, b.length);
+            countLength += b.length;
+        }
+        return allBytes;
+    }
+
 
 
 }

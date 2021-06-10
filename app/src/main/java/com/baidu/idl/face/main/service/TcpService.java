@@ -25,8 +25,10 @@ import java.io.BufferedOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -89,6 +91,10 @@ public class TcpService extends Service {
 
     private final byte[] mDeleteResponse = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, 0x55, 0x00, 0x10, 0x00, 0x35};
     private final byte[] mDeleteOk = new byte[]{0x4F, 0x4B, 0x00, 0x00};
+//
+//    private final byte[] mFaceLib = new byte[]{(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xAA, (byte) 0x55, (byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x1B};
+//    private final byte[] mFaceLibOk = new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00};
+
 
     /**
      * 队列大小
@@ -165,7 +171,10 @@ public class TcpService extends Service {
     /**
      * 存储分包byte
      */
-    byte[] newByte = new byte[5274];
+//    byte[] newByte = new byte[5274];
+    byte[] newByte = new byte[1024 * 1024 * 10];
+
+    List<byte[]> listByte = new ArrayList<>();
     /**
      * 单个线程池
      */
@@ -355,99 +364,187 @@ public class TcpService extends Service {
                         byte[] category = new byte[2];
                         System.arraycopy(buffer, 8, category, 0, 2);
 
-//                        //获取标识码
-//                        byte[] infoCode = new byte[1];
-//                        System.arraycopy(buffer, 10, infoCode, 0, 1);
-                        //删除
-                        if (Arrays.equals(category, mRemoveStaffCategory)) {
-                            //获取标识码
-                            byte[] infoCode = new byte[1];
-                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+                        //获取后台返回最后两位字节
+                        byte[] checkByte = new byte[2];
+                        System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+                        //判断是否完整的包
+                        if (!Utils.byteToHex(checkByte).equals("0000")) {
+//                            newByte = buffer;
+                            listByte.add(buffer);
+                        } else {
 
+                            boolean flag = false;
+                            //删除人员
+                            if (Arrays.equals(category, mRemoveStaffCategory)) {
+                                //获取标识码
+                                byte[] infoCode = new byte[1];
 
-                            //获取后台返回最后两位字节
-                            byte[] checkByte = new byte[2];
-                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
-                            //检验是不是完整的包
-                            if (!Utils.byteToHex(checkByte).equals("0000")) {
-                                newByte = buffer;
-                            } else {
+                                System.arraycopy(buffer, 10, infoCode, 0, 1);
                                 if ((size - 15) % 4 == 0) { //没有余数说明是完整的包
-
                                     removeStaff(buffer, size);
+                                    Log.e("TAG", "Remove_infoCode: " + Utils.byteToHex(infoCode));
                                     mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
-
-                                } else {
-                                    //合并两个byte数组
-                                    byte[] concatByte = Utils.concat(newByte, buffer);
-
-                                    removeStaff(concatByte, concatByte.length);
-                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
-
+                                    flag = true;
                                 }
-                            }
 
-
-//                            removeStaff(buffer, size);
-//                            mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
-                            //新增
-                        } else if (Arrays.equals(category, mNewStaffCategory)) {
-                            //获取标识码
-                            byte[] infoCode = new byte[1];
-                            System.arraycopy(buffer, 10, infoCode, 0, 1);
-
-
-                            //获取后台返回最后两位字节
-                            byte[] checkByte = new byte[2];
-                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
-                            //检验是不是完整的包
-                            if (!Utils.byteToHex(checkByte).equals("0000")) {
-                                newByte = buffer;
-                            } else {
+                            //新增人员
+                            } else if (Arrays.equals(category, mNewStaffCategory)) {
+                                //获取标识码
+                                byte[] infoCode = new byte[1];
+                                System.arraycopy(buffer, 10, infoCode, 0, 1);
                                 if ((size - 15) % 526 == 0) { //没有余数说明是完整的包
 
                                     addStaff(buffer, size);
+                                    flag = true;
                                     FaceApi.getInstance().initDatabases(true);
-                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
-
-                                } else {
-                                    //合并两个byte数组
-                                    byte[] concatByte = Utils.concat(newByte, buffer);
-
-                                    addStaff(concatByte, concatByte.length);
-                                    FaceApi.getInstance().initDatabases(true);
+                                    Log.e("TAG", "add_infoCode: " + Utils.byteToHex(infoCode));
                                     mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
 
                                 }
-                            }
 
-
-//                            addStaff(buffer, size);
-//                            FaceApi.getInstance().initDatabases(true);
-//                            mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
-                            //获取特征库
-                        } else if (Arrays.equals(category, mFaceLibCategory)) {
-                            //获取后台返回最后两位字节
-                            byte[] checkByte = new byte[2];
-                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
-                            //检验是不是完整的包
-                            if (!Utils.byteToHex(checkByte).equals("0000")) {
-                                newByte = buffer;
-                            } else {
+                            //人脸库
+                            } else if (Arrays.equals(category, mFaceLibCategory)) {
+                                byte[] infoCode = new byte[1];
+                                System.arraycopy(buffer, 10, infoCode, 0, 1);
                                 if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
                                     registerStartAddress(buffer, size);
-
-                                } else {
-                                    //合并两个byte数组
-                                    byte[] concatByte = Utils.concat(newByte, buffer);
-                                    registerStartAddress(concatByte, concatByte.length);
-
+//                                    Log.e("TAG", "FaceLib_infoCode: " + Utils.byteToHex(infoCode));
+//                                    mQueue.offer(Utils.addBytes(mFaceLib, infoCode, mFaceLibOk));
+                                    flag = true;
                                 }
                             }
+
+                            if (!flag) {
+                                //拼接字节数组
+                                byte[] concatByte = new byte[1024 * 1024 * 10];
+                                listByte.add(buffer);
+                                for (int i = 0; i < listByte.size() - 1; i++) {
+                                    if (i == 0) {
+                                        concatByte = Utils.concat(listByte.get(i), listByte.get(i + 1));
+                                    } else {
+                                        concatByte = Utils.concat(concatByte, listByte.get(i + 1));
+                                    }
+                                }
+
+
+//                            byte[] infoCode = new byte[1];
+//                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+                                byte[] merge = new byte[2];
+                                System.arraycopy(concatByte, 8, merge, 0, 2);
+
+                                if (Arrays.equals(merge, mRemoveStaffCategory)) {
+                                    //获取标识码
+                                    byte[] infoCode = new byte[1];
+                                    System.arraycopy(concatByte, 10, infoCode, 0, 1);
+
+                                    removeStaff(concatByte, concatByte.length);
+                                    listByte.clear();
+                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+                                } else if (Arrays.equals(merge, mNewStaffCategory)) {
+                                    //获取标识码
+                                    byte[] infoCode = new byte[1];
+                                    System.arraycopy(concatByte, 10, infoCode, 0, 1);
+
+                                    addStaff(concatByte, concatByte.length);
+                                    listByte.clear();
+                                    FaceApi.getInstance().initDatabases(true);
+                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+                                } else if (Arrays.equals(merge, mFaceLibCategory)) {
+                                    //获取标识码
+//                                    byte[] infoCode = new byte[1];
+//                                    System.arraycopy(concatByte, 10, infoCode, 0, 1);
+                                    registerStartAddress(concatByte, concatByte.length);
+                                    listByte.clear();
+//                                    mQueue.offer(Utils.addBytes(mFaceLib, infoCode, mFaceLibOk));
+                                }
+                            }
+
 
                         }
 
+
+//                        //删除
+//                        if (Arrays.equals(category, mRemoveStaffCategory)) {
+//                            //获取标识码
+//                            byte[] infoCode = new byte[1];
+//                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+//
+//                            //获取后台返回最后两位字节
+//                            byte[] checkByte = new byte[2];
+//                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+//                            //检验是不是完整的包
+//                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+//                                newByte = buffer;
+//                            } else {
+//                                if ((size - 15) % 4 == 0) { //没有余数说明是完整的包
+//
+//                                    removeStaff(buffer, size);
+//                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+//
+//                                } else {
+//                                    //合并两个byte数组
+//                                    byte[] concatByte = Utils.concat(newByte, buffer);
+//
+//                                    removeStaff(concatByte, concatByte.length);
+//                                    mQueue.offer(Utils.addBytes(mDeleteResponse, infoCode, mDeleteOk));
+//
+//                                }
+//                            }
+//
+//                            //新增
+//                        } else if (Arrays.equals(category, mNewStaffCategory)) {
+//                            //获取标识码
+//                            byte[] infoCode = new byte[1];
+//                            System.arraycopy(buffer, 10, infoCode, 0, 1);
+//
+//
+//                            //获取后台返回最后两位字节
+//                            byte[] checkByte = new byte[2];
+//                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+//                            //检验是不是完整的包
+//                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+//                                newByte = buffer;
+//                            } else {
+//                                if ((size - 15) % 526 == 0) { //没有余数说明是完整的包
+//
+//                                    addStaff(buffer, size);
+//                                    FaceApi.getInstance().initDatabases(true);
+//                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+//
+//                                } else {
+//                                    //合并两个byte数组
+//                                    byte[] concatByte = Utils.concat(newByte, buffer);
+//
+//                                    addStaff(concatByte, concatByte.length);
+//                                    FaceApi.getInstance().initDatabases(true);
+//                                    mQueue.offer(Utils.addBytes(mAddResponse, infoCode, mok));
+//
+//                                }
+//                            }
+//
+//                            //获取特征库
+//                        } else if (Arrays.equals(category, mFaceLibCategory)) {
+//                            //获取后台返回最后两位字节
+//                            byte[] checkByte = new byte[2];
+//                            System.arraycopy(buffer, buffer.length - 2, checkByte, 0, 2);
+//                            //检验是不是完整的包
+//                            if (!Utils.byteToHex(checkByte).equals("0000")) {
+//                                newByte = buffer;
+//                            } else {
+//                                if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
+//                                    registerStartAddress(buffer, size);
+//
+//                                } else {
+//                                    //合并两个byte数组
+//                                    byte[] concatByte = Utils.concat(newByte, buffer);
+//                                    registerStartAddress(concatByte, concatByte.length);
+//
+//                                }
+//                            }
+//                        }
+
                     }
+//                    Thread.sleep(5);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -474,17 +571,18 @@ public class TcpService extends Service {
 //        //获取特征库 寄存器起始地址
 //        else if (Arrays.equals(category, mFaceLibCategory)) {
 
-            byte[] faceNumByte = new byte[2];
-            System.arraycopy(buffer, 10, faceNumByte, 0, 2);
-            //寄存器数量
-            int faceNum = Utils.bytesToInt(faceNumByte);
-            if (inTotalInfoBool) {
-                //总人员信息
-                inTotalInfo = faceNum + (size - 14) / 526;
-                inTotalInfoBool = false;
-            }
-            //获取后台人脸特征库
-            onRegister(buffer, size);
+        byte[] faceNumByte = new byte[2];
+        System.arraycopy(buffer, 10, faceNumByte, 0, 2);
+        //寄存器数量
+        int faceNum = Utils.bytesToInt(faceNumByte);
+        if (inTotalInfoBool) {
+            //总人员信息
+            inTotalInfo = faceNum + (size - 14) / 526;
+            inTotalInfoBool = false;
+        }
+        //获取后台人脸特征库
+        onRegister(buffer, size);
+//        addStaff(buffer, size);
 
 
 //        }
