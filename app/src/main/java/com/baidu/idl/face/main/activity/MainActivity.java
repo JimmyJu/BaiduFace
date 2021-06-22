@@ -325,7 +325,7 @@ public class MainActivity extends BaseActivity {
 
         handler.postDelayed(() -> {
             startActivity(new Intent(MainActivity.this, FaceRGBCloseDebugSearchActivity.class));
-        }, 60 * 1000);
+        }, 30 * 1000);
     }
 
     /**

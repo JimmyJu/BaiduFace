@@ -808,6 +808,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        CameraPreviewManager.getInstance().stopPreview();
         mWiegand.release();
         if (SingleBaseConfig.getBaseConfig().getMusicSwitch() == 1) {
 //            mSoundPool.release();

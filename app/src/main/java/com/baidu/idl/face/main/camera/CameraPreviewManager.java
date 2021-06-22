@@ -5,7 +5,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.util.Log;
-import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
@@ -322,6 +321,7 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    stopPreview();
                     openCamera();
                 }
             }, 2000);
