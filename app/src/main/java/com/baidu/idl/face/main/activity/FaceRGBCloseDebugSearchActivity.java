@@ -203,7 +203,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         getDevicesNum();
 
         //监听时间戳，获取被赋值的时间比当前时间小于1秒，说明屏幕卡住不动了
-        monitorTimestamp();
+//        monitorTimestamp();
 
         //监听状态灯
 //        checkLightState();
@@ -401,6 +401,9 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     }
 
     private void startTestCloseDebugRegisterFunction() {
+        //获取当前时间
+        timeFlag = DateUtil.timeStamp();
+
         // 设置USB摄像头
         CameraPreviewManager.getInstance().setCameraFacing(CameraPreviewManager.CAMERA_USB);
         CameraPreviewManager.getInstance().startPreview(this, mAutoCameraPreviewView,
@@ -409,7 +412,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     //相机预览页面回调方法
                     public void onGetCameraData(byte[] data, Camera camera, int width, int height) {
                         //每次回调后获取当前时间赋值给timeFlag
-                        timeFlag = DateUtil.timeStamp();
+//                        timeFlag = DateUtil.timeStamp();
                         // 摄像头预览数据进行人脸检测
                         FaceSDKManager.getInstance().onDetectCheck(data, null, null,
                                 height, width, mLiveType, new FaceDetectCallBack() {
@@ -458,6 +461,13 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * @param height
      */
     private void checkCloseResult(final LivenessModel livenessModel, int width, int height) {
+
+        if (Long.parseLong(DateUtil.timeStamp()) - Long.parseLong(timeFlag) > 1) {
+            timeFlag = DateUtil.timeStamp();
+        } else {
+            return;
+        }
+
         // 当未检测到人脸UI显示.
         runOnUiThread(new Runnable() {
             @Override
@@ -471,7 +481,13 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     rlDiscernBg.setVisibility(View.GONE);
                     //延迟关闭状态灯
 //                    closeAllLight();
-                    delayClose_Red_GedreenLight();
+                    try {
+                        delayClose_Red_GedreenLight();
+                    } catch (Exception e) {
+                        Log.e("loge", "run:----- delayClose_Red_GedreenLight----异常" + e.toString());
+                        ToastUtils.toast(getApplicationContext(), "delayClose_Red_GedreenLight----异常");
+                    }
+
                     whiteLight_Status = 0;
                     RedLight_Status = 0;
                     GreenLight_Status = 0;
@@ -515,8 +531,14 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     /*if (whiteLight_Status == 0 && bright > BRIGHTNESS_VALUE) {
                         delayLight();
                     }*/
-                    if (whiteLight_Status == 0 && bright < BRIGHTNESS_VALUE) {
-                        manager.pullUpWhiteLight();
+                    try {
+                        if (whiteLight_Status == 0 && bright < BRIGHTNESS_VALUE) {
+                            manager.pullUpWhiteLight();
+                        }
+
+                    } catch (Exception e) {
+                        Log.e("loge", "run:----- pullUpWhiteLight----异常" + e.toString() + "\r\n");
+                        ToastUtils.toast(getApplicationContext(), "pullUpWhiteLight--异常");
                     }
 
 //                    Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
@@ -529,32 +551,33 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     if (user == null) {
                         if (livenessModel.getFeatureContrastValue() < 80.00) {
 
-                            if (GreenLight_Status == 1) {
-                                manager.pullDownGreenLight();
-                                GreenLight_Status = 0;
-                            }
-
-//                            manager.pullUpRedLight();
-//                            RedLight_Status = 1;
-                            delayRedLight();
                             //延迟3秒发送给后台图片、特征值
                             delaySendData(livenessModel, imageData, null);
                             //识别失败
                             discernFailureView();
                             //发送串口数据
                             sendSerialPortData(null);
+
+
+                            try {
+                                if (GreenLight_Status == 1) {
+                                    manager.pullDownGreenLight();
+                                    GreenLight_Status = 0;
+                                }
+                            } catch (Exception e) {
+                                Log.e("loge", "run:----- pullDownGreenLight----异常" + e.toString());
+                                ToastUtils.toast(getApplicationContext(), "pullDownGreenLight---异常");
+                            }
+
+                            try {
+                                delayRedLight();
+                            } catch (Exception e) {
+                                Log.e("loge", "run:----- delayRedLight----异常" + e.toString());
+                                ToastUtils.toast(getApplicationContext(), "delayRedLight()---异常");
+                            }
+
                         }
                     } else {
-                        if (RedLight_Status == 1) {
-                            manager.pullDownRedLight();
-                            RedLight_Status = 0;
-                        }
-
-                        delayGreenLight();
-//                        manager.pullUpGreenLight();
-//                        GreenLight_Status = 1;
-
-
                         if (faceImage.containsKey(user.getUserName())) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
                             //识别成功
@@ -573,6 +596,25 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                         delaySendData(livenessModel, imageData, user);
                         //发送串口数据
                         sendSerialPortData(user);
+
+                        try {
+                            if (RedLight_Status == 1) {
+                                manager.pullDownRedLight();
+                                RedLight_Status = 0;
+                            }
+
+                        } catch (Exception e) {
+                            Log.e("loge", "run:----- delayRedLight----异常" + e.toString());
+                            ToastUtils.toast(getApplicationContext(), "pullDownRedLight--异常");
+                        }
+
+                        try {
+                            delayGreenLight();
+                        } catch (Exception e) {
+                            Log.e("loge", "run:----- delayRedLight----异常" + e.toString());
+                            ToastUtils.toast(getApplicationContext(), "delayGreenLight---异常");
+                        }
+
                     }
                 }
             }
@@ -843,13 +885,13 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (etUsername.getText().toString().length() == 0 || etPassword.getText().toString().length() == 0) {
-                            ToastUtils.toast(getApplicationContext(),"账号或密码不能为空!");
+                            ToastUtils.toast(getApplicationContext(), "账号或密码不能为空!");
                         } else if (etUsername.getText().toString().equals("Admin")
                                 && etPassword.getText().toString().equals("123456")) {
                             startActivity(new Intent(mContext, FaceMainSearchActivity.class));
                             finish();
                         } else {
-                            ToastUtils.toast(getApplicationContext(),"账号或密码不正确!");
+                            ToastUtils.toast(getApplicationContext(), "账号或密码不正确!");
                         }
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
