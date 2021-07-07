@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 常用功能封装
@@ -436,7 +438,68 @@ public class Utils {
     }
 
 
+    public static boolean isNumeric(String str) {
+        Pattern pattern = Pattern.compile("[0-9]*");
+        Matcher isNum = pattern.matcher(str);
+        if (!isNum.matches()) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * 判断字符是否是中文
+     *
+     * @param c 字符
+     * @return 是否是中文
+     */
+    public static boolean isChinese(char c) {
+        Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断字符串是否是乱码
+     *
+     * @param strName
+     *            字符串
+     * @return 是否是乱码
+     */
+    public static boolean isMessyCode(String strName) {
+        String temp = strName.replaceAll("[0-9a-zA-Z\\p{P}\\s]", "");
+//		System.out.println(temp);
+        char[] ch = temp.toCharArray();
+        for (int i = 0; i < ch.length; i++) {
+            char c = ch[i];
+            if (!isChinese(c)) {
+//                System.out.println(i + "" + temp.charAt(i) + "is not chinese");
+//                Log.e("TAG", "isMessyCode: " +temp.charAt(i) + "is not chinese");
+                return true;
+            } else {
+//				System.out.println(i + "" + temp.charAt(i) + "is a chinese");
+            }
+        }
+        return false;
+    }
+//
+//    public static void main(String[] args) {
+//        System.out.println(isMessyCode("Ã©Å¸Â©Ã©Â¡ÂºÃ¥Â¹Â³"));
+//        System.out.println(isMessyCode("你好"));
+//        System.out.println(isNumeric("836uu537"));
+//    }
+
 
 }
+
+
 
 

@@ -91,7 +91,8 @@ public class MainActivity extends BaseActivity {
         schoolTime();
 
         //设置低功耗蓝牙
-        setupBLE();
+//        setupBLE();
+        initLicense();
     }
 
     private void initView() {
@@ -227,10 +228,11 @@ public class MainActivity extends BaseActivity {
             NavigationBarUtil.dialogShow(progressDialog);
         }
         if (progressDialog != null) {
+            progressDialog.dismiss();
             progressDialog.setProgress(progressList.getSuccess());
             if (progressList.getFaceLibNum() - progressList.getSuccess() == 0) {
                 FaceApi.getInstance().initDatabases(true);
-                progressDialog.dismiss();
+//                progressDialog.dismiss();
                 faceLoadingFlag = true;
             }
         }
@@ -314,7 +316,7 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
-     * 开启服务
+   F  * 开启服务
      */
     private void openService() {
         //开启socket以及串口，先判断防止重复开启服务
@@ -325,7 +327,7 @@ public class MainActivity extends BaseActivity {
 
         handler.postDelayed(() -> {
             startActivity(new Intent(MainActivity.this, FaceRGBCloseDebugSearchActivity.class));
-        }, 30 * 1000);
+        }, 10 * 1000);
     }
 
     /**

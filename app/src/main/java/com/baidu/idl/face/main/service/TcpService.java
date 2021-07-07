@@ -12,7 +12,6 @@ import android.util.Log;
 import com.baidu.idl.face.main.api.FaceApi;
 import com.baidu.idl.face.main.callback.RemoveStaffCallback;
 import com.baidu.idl.face.main.constant.BaseConstant;
-import com.baidu.idl.face.main.db.DBManager;
 import com.baidu.idl.face.main.manager.UserInfoManager;
 import com.baidu.idl.face.main.model.ProgressList;
 import com.baidu.idl.face.main.utils.LiveDataBus;
@@ -324,7 +323,7 @@ public class TcpService extends Service {
                 byte[] buffers = new byte[1024 * 1024 * 10];
                 while ((size = mBis.read(buffers)) != -1) {
                     if (isRequest) {
-                        DBManager.getInstance().deleteGroup("default");
+//                        DBManager.getInstance().deleteGroup("default");
                         mQueue.offer(mRequestFaceLib);
                         Log.e("------------", "请求");
                     }
@@ -387,7 +386,7 @@ public class TcpService extends Service {
                                     flag = true;
                                 }
 
-                            //新增人员
+                                //新增人员
                             } else if (Arrays.equals(category, mNewStaffCategory)) {
                                 //获取标识码
                                 byte[] infoCode = new byte[1];
@@ -402,12 +401,13 @@ public class TcpService extends Service {
 
                                 }
 
-                            //人脸库
+                                //人脸库
                             } else if (Arrays.equals(category, mFaceLibCategory)) {
                                 byte[] infoCode = new byte[1];
                                 System.arraycopy(buffer, 10, infoCode, 0, 1);
                                 if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
                                     registerStartAddress(buffer, size);
+                                    FaceApi.getInstance().initDatabases(true);
 //                                    Log.e("TAG", "FaceLib_infoCode: " + Utils.byteToHex(infoCode));
 //                                    mQueue.offer(Utils.addBytes(mFaceLib, infoCode, mFaceLibOk));
                                     flag = true;
@@ -454,6 +454,7 @@ public class TcpService extends Service {
 //                                    byte[] infoCode = new byte[1];
 //                                    System.arraycopy(concatByte, 10, infoCode, 0, 1);
                                     registerStartAddress(concatByte, concatByte.length);
+                                    FaceApi.getInstance().initDatabases(true);
                                     listByte.clear();
 //                                    mQueue.offer(Utils.addBytes(mFaceLib, infoCode, mFaceLibOk));
                                 }
@@ -656,11 +657,30 @@ public class TcpService extends Service {
                         e.printStackTrace();
                     }
 
-                    //添加到数据库中
-                    isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
-                    if (isSuccess) {
-                        success++;
+                    Log.e(TAG, "run: " + "card: " + username.trim() +
+                            "  getCard: " + FaceApi.getInstance().getUserByUserName("default", username) + "---->" + !(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))));
+
+
+                    if (!(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))) && !Utils.isMessyCode(username.trim()) && Utils.isNumeric(card.trim())) {
+                        //添加到数据库中
+                        isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
+                        if (isSuccess) {
+                            success++;
+                        }else {
+                            isRequest = true;
+                            return;
+                        }
                     }
+
+//                    if (Utils.isNumeric(card)) {
+//                        isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
+//                        if (isSuccess) {
+//                            success++;
+//                        }
+//                    } else {
+//
+//                    }
+
                 }
                 Log.e(TAG, "run: " + success);
                 progressList.setProgress(progressFlag);
@@ -771,11 +791,11 @@ public class TcpService extends Service {
                     }
                 }
                 Log.e(TAG, "add: " + success);
-                progressList.setProgress(progressFlag);
-                progressList.setFaceLibNum(inTotalInfo);
-                progressList.setSuccess(success);
-                LiveDataBus.get().with("progressData").postValue(progressList);
-                progressFlag = true;
+//                progressList.setProgress(progressFlag);
+//                progressList.setFaceLibNum(inTotalInfo);
+//                progressList.setSuccess(success);
+//                LiveDataBus.get().with("progressData").postValue(progressList);
+//                progressFlag = true;
             }
         });
     }

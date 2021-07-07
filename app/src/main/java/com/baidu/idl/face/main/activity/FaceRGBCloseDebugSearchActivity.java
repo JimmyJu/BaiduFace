@@ -461,13 +461,11 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * @param height
      */
     private void checkCloseResult(final LivenessModel livenessModel, int width, int height) {
-
         if (Long.parseLong(DateUtil.timeStamp()) - Long.parseLong(timeFlag) > 1) {
             timeFlag = DateUtil.timeStamp();
         } else {
             return;
         }
-
         // 当未检测到人脸UI显示.
         runOnUiThread(new Runnable() {
             @Override
@@ -522,7 +520,6 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     } else {
 
                     }
-
                     //获取照片
                     mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
                     //获取照片亮度值
@@ -549,6 +546,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
                     User user = livenessModel.getUser();
                     if (user == null) {
+//                        ToastUtils.toast(mContext,"识别失败");
                         if (livenessModel.getFeatureContrastValue() < 80.00) {
 
                             //延迟3秒发送给后台图片、特征值
@@ -578,6 +576,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
                         }
                     } else {
+//                        ToastUtils.toast(mContext,"识别成功");
                         if (faceImage.containsKey(user.getUserName())) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
                             //识别成功
@@ -614,6 +613,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                             Log.e("loge", "run:----- delayRedLight----异常" + e.toString());
                             ToastUtils.toast(getApplicationContext(), "delayGreenLight---异常");
                         }
+
 
                     }
                 }

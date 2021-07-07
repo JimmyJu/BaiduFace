@@ -135,6 +135,19 @@ public class FaceApi {
         return userList;
     }
 
+    public String getUserByUserName(String groupId, String userName) {
+        if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(userName)) {
+            return null;
+        }
+        List<User> userList = DBManager.getInstance().queryUserByUserName(groupId, userName);
+        if (userList != null && userList.size() > 0) {
+//            String userInfo = userList.get(0).getUserInfo();
+            String userInfo = userList.get(0).getUserName();
+            return userInfo.trim();
+        }
+        return "";
+    }
+
     /**
      * 根据_id查找用户
      */
