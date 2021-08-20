@@ -17,7 +17,8 @@ class BaseApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         //初始化BugLy
-        initBugLy("221e6606c1", true)
+//        initBugLy("221e6606c1", true)
+        initBugLy("cfb8f1ecab", true)
 
         AppStateMonitor.track(this, object : AppStateChangeListener {
             override fun appTurnIntoForeground() {

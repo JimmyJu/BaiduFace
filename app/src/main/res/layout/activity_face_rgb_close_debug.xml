@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/ll"
-        android:layout_below="@id/search_title"
         android:visibility="invisible" />
 
     <TextureView
@@ -19,22 +18,38 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/ll"
-        android:layout_below="@id/search_title"
         android:visibility="invisible" />
 
     <com.baidu.idl.face.main.camera.AutoTexturePreviewView
         android:id="@+id/auto_camera_preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/ll" />
+
+    <com.baidu.idl.face.main.camera.AutoTexturePreviewView
+        android:id="@+id/auto_camera_infrared"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_80"
         android:layout_above="@id/ll"
-        android:layout_below="@id/search_title" />
+        android:layout_alignParentRight="true"
+        />
+
+    <!--<ToggleButton
+        android:id="@+id/toggle_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_15"
+        android:layout_marginBottom="@dimen/dp_15"
+        android:layout_above="@id/tvDeviceID"
+        android:background="@drawable/toggle_bg"
+        android:textOff=""
+        android:textOn="" />-->
 
     <TextureView
         android:id="@+id/draw_detect_face_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/ll"
-        android:layout_below="@id/search_title"
         android:layout_marginBottom="0dp" />
 
     <ImageView
@@ -49,12 +64,10 @@
         android:id="@+id/tvDeviceID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp_15"
-        android:textColor="#2196F3"
-        android:layout_marginBottom="@dimen/dp_40"
         android:layout_alignParentBottom="true"
-
-        />
+        android:layout_marginStart="@dimen/dp_15"
+        android:layout_marginBottom="@dimen/dp_40"
+        android:textColor="#2196F3" />
 
     <View
         android:layout_width="match_parent"
@@ -249,8 +262,8 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_weight="2"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <ImageView

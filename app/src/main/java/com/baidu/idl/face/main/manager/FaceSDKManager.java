@@ -2,16 +2,14 @@ package com.baidu.idl.face.main.manager;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.baidu.idl.face.main.api.FaceApi;
-import com.baidu.idl.face.main.db.DBManager;
-import com.baidu.idl.face.main.listener.SdkInitListener;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.callback.FaceFeatureCallBack;
+import com.baidu.idl.face.main.db.DBManager;
+import com.baidu.idl.face.main.listener.SdkInitListener;
 import com.baidu.idl.face.main.model.GlobalSet;
 import com.baidu.idl.face.main.model.LivenessModel;
-
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.model.User;
 import com.baidu.idl.face.main.utils.LogUtils;
@@ -38,7 +36,6 @@ import java.util.concurrent.Future;
 import static com.baidu.idl.face.main.model.GlobalSet.FEATURE_SIZE;
 import static com.baidu.idl.face.main.model.GlobalSet.TIME_TAG;
 import static com.baidu.idl.main.facesdk.model.BDFaceSDKCommon.BDFaceAnakinRunMode.BDFACE_ANAKIN_RUN_AT_SMALL_CORE;
-import static com.baidu.idl.main.facesdk.model.BDFaceSDKCommon.BDFaceLogInfo.BDFACE_LOG_ALL_MESSAGE;
 
 public class FaceSDKManager {
 
@@ -641,6 +638,7 @@ public class FaceSDKManager {
             // 特征提取成功
             // TODO 阈值可以根据不同模型调整
             long startFeature = System.currentTimeMillis();
+            //当前feature和预加载Feature 集合比对，返回预加载Feature集合中命中的id，feature 字段和比对分值score；用户可以通过id 在数据库中查找全量信息。
             ArrayList<Feature> featureResult = FaceSDKManager.getInstance().getFaceFeature().featureSearch(feature,
                     BDFaceSDKCommon.FeatureType.BDFACE_FEATURE_TYPE_LIVE_PHOTO,
                     1, true);
@@ -650,11 +648,13 @@ public class FaceSDKManager {
                 Feature topFeature = featureResult.get(0);
                 livenessModel.setFeatureContrastValue(topFeature.getScore());
 //                Log.e("TAG", "onFeatureCheck: " + topFeature.getScore());
+//                Log.e("TAG", "initSuccess: " +  "比对分值__" + topFeature.getScore());
                 // 判断第一个阈值是否大于设定阈值，如果大于，检索成功
                 if (topFeature != null && topFeature.getScore() >
                         SingleBaseConfig.getBaseConfig().getThreshold()) {
                     // 当前featureEntity 只有id+feature 索引，在数据库中查到完整信息
                     User user = FaceApi.getInstance().getUserListById(topFeature.getId());
+//                    Log.e("TAG", "initSuccess: " + user.toString());
                     if (user != null) {
                         livenessModel.setUser(user);
                         livenessModel.setFeatureScore(topFeature.getScore());

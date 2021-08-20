@@ -38,6 +38,19 @@ public class Utils {
         return "3.0.0";
     }
 
+
+//    public static void main(String args[]) {
+//        int j = 1;
+////        byte[] b = {(byte)0x4F,(byte)0x4B,};
+////        System.out.println(Arrays.toString(b));
+////        String str= new String (b);
+////        System.out.print(str);
+//        for (int i = 0; i <= 10; i++) {
+//            byte[] bytes = Utils.hexString2Bytes(Utils.addZero1(j++ + ""));
+//            System.out.println(byteToHex(bytes));
+//        }
+//    }
+
     /**
      * 时间格式转化
      *
@@ -175,6 +188,21 @@ public class Utils {
         } else if (id.length() == 7) {
             ids = "0" + id;
         } else if (id.length() == 8) {
+            ids = id;
+        }
+
+        return ids;
+    }
+
+    public static String addZero1(String id) {
+        String ids = null;
+        if (id.length() == 1) {
+            ids = "000" + id;
+        } else if (id.length() == 2) {
+            ids = "00" + id;
+        } else if (id.length() == 3) {
+            ids = "0" + id;
+        } else if (id.length() == 4) {
             ids = id;
         }
 

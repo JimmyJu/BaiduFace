@@ -43,4 +43,9 @@ class User {
     var imageName = ""
     var feature: ByteArray? = null
     var isChecked = false
+    override fun toString(): String {
+        return "User(id=$id, userId='$userId', userName='$userName', groupId='$groupId', ctime=$ctime, updateTime=$updateTime, userInfo='$userInfo', imageName='$imageName', feature=${feature?.contentToString()}, isChecked=$isChecked)"
+    }
+
+
 }

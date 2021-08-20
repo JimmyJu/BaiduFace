@@ -41,7 +41,7 @@ public class FaceUserListActivity extends BaseActivity implements View.OnClickLi
     private Button mBtnBatchOperation;
     private EditText mEditUserSearch;
     private RecyclerView mRecyclerUserList;
-    private TextView mTextGroupName;
+    private TextView mTextGroupName, number_of_users;
     private LinearLayout mLinearOperation;
 
     private Context mContext;
@@ -95,6 +95,8 @@ public class FaceUserListActivity extends BaseActivity implements View.OnClickLi
     }
 
     private void initView() {
+
+        number_of_users = findViewById(R.id.number_of_users);
         // title相关
         TextView textTitle = findViewById(R.id.tv_title);
         textTitle.setText("人脸库管理");
@@ -135,6 +137,13 @@ public class FaceUserListActivity extends BaseActivity implements View.OnClickLi
         // 读取数据库，获取用户信息
         UserInfoManager.getInstance().getUserListInfoByGroupId(null, mGroupId,
                 mUserListListener);
+        //获取所有用户
+        List<User> userList = FaceApi.getInstance().getUserList(mGroupId);
+        if (userList != null) {
+            int size = userList.size();
+            number_of_users.setText(String.valueOf(size));
+        }
+
     }
 
     @Override
@@ -224,9 +233,9 @@ public class FaceUserListActivity extends BaseActivity implements View.OnClickLi
                         ToastUtils.toast(mContext, "暂未搜索到此用户");
                     } else {
                         mListUserInfo = listUserInfo;
+
                     }
                     mFaceUserAdapter.setDataList(listUserInfo);
-
                     if (mButtonState == ButtonState.ALL_SELECT) {
                         updateDeleteUI(false);
                         ToastUtils.toast(mContext, "删除成功");

@@ -79,6 +79,7 @@ public class TcpService extends Service {
     private final byte[] mHeartAdress = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x1d, (byte) 0x00, (byte) 0x01};
     private final byte[] mRegisterAdress = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x21};
     private final byte[] mRegisterAdress22 = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x22};
+    private final byte[] mRegisterAdress23 = new byte[]{(byte) 0x00, (byte) 0x10, (byte) 0x00, (byte) 0x23};
     private final byte[] mCheckCode = new byte[]{(byte) 0x00, (byte) 0x00};
     private final byte[] mHeartCategory = new byte[]{(byte) 0x00, (byte) 0x1D};
     private final byte[] mRegisterCategory = new byte[]{(byte) 0x00, (byte) 0x21};
@@ -98,7 +99,7 @@ public class TcpService extends Service {
     /**
      * 队列大小
      */
-    private final int mQueueSize = 1000;
+    private final int mQueueSize = 2000;
     /**
      * 队列
      */
@@ -119,6 +120,8 @@ public class TcpService extends Service {
     private boolean serialHeartbeatThreadFlag = true;
 
     private boolean switchPort;
+    //当前照片序号
+    private int numPhoto = 0;
     /**
      * 首页发送次数
      */
@@ -207,10 +210,16 @@ public class TcpService extends Service {
         LiveDataBus.get().with("SerialData", byte[].class).observeForever(observer);
 
         LiveDataBus.get().with("registerData", byte[].class).observeForever(faceObserver);
+
+        //批量数据上传
+        LiveDataBus.get().with("bulkData", byte[].class).observeForever(bulkDataObserver);
+
         //获取平板关机消息
         LiveDataBus.get().with(BaseConstant.slabShutdownMessage, Integer.class).observeForever(getSlabShutdownMessageObserver);
-
+        //切换注册、正常模式
         LiveDataBus.get().with("switchPort", Boolean.class).observeForever(switchPortObserver);
+
+        LiveDataBus.get().with("NUM", Integer.class).observeForever(numObserver);
     }
 
     public class ClientBinder extends Binder {
@@ -351,6 +360,26 @@ public class TcpService extends Service {
                             mHandler.postDelayed(disConnectRunnable, 25000);
                             Log.d(TAG, "我收到来自服务器的消息: " + data + "--计数" + dataNum);
                         }
+                    } else if (size == 16) {
+                        //批量上传时 接收返回数据
+                        byte[] num = new byte[2];
+                        System.arraycopy(buffer, 10, num, 0, 2);
+                        String s = Utils.byteToHex(num);
+
+                        byte[] content = new byte[2];
+                        System.arraycopy(buffer, 12, content, 0, 2);
+                        String str = new String(content);
+                        Log.e(TAG, "图片状态: " + str + " 编号： " + s);
+//                        Log.e(TAG, "run: " + numPhoto );
+
+//                        if (String.valueOf(numPhoto).equals(s)) {
+//                            if ("ER".equals(str)) {
+//                                LiveDataBus.get().with("bulkUpload").postValue(false);
+//                            } else if ("OK".equals(str)) {
+//                                LiveDataBus.get().with("bulkUpload").postValue(true);
+//                            }
+//                        }
+
                     }
 //                    else if (size == 19) { // size == 18说明是收到删除人员信息
 //                        byte[] infoCode = new byte[1];
@@ -660,13 +689,13 @@ public class TcpService extends Service {
                     Log.e(TAG, "run: " + "card: " + username.trim() +
                             "  getCard: " + FaceApi.getInstance().getUserByUserName("default", username) + "---->" + !(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))));
 
-
                     if (!(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))) && !Utils.isMessyCode(username.trim()) && Utils.isNumeric(card.trim())) {
                         //添加到数据库中
                         isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
                         if (isSuccess) {
                             success++;
-                        }else {
+//                            Log.e(TAG, "插入 用户 " + username.trim() + " 卡号 " + card);
+                        } else {
                             isRequest = true;
                             return;
                         }
@@ -789,6 +818,7 @@ public class TcpService extends Service {
                     if (isSuccess) {
                         success++;
                     }
+                    FaceApi.getInstance().initDatabases(true);
                 }
                 Log.e(TAG, "add: " + success);
 //                progressList.setProgress(progressFlag);
@@ -933,7 +963,7 @@ public class TcpService extends Service {
                         if (mBos != null) {
                             mBos.write((byte[]) mQueue.poll());
                             mBos.flush();
-                            LiveDataBus.get().with("sendNum").postValue(mSendNum++);
+//                            LiveDataBus.get().with("sendNum").postValue(mSendNum++);
                         }
                     }
                     mHandler.removeCallbacks(mSendRunnable);
@@ -977,7 +1007,7 @@ public class TcpService extends Service {
                     byte[] heartData = Utils.heartData(cTime);
                     //发送串口心跳数据
                     serialPortUtils.sendSerialPort(heartData);
-                    LiveDataBus.get().with("sendNum").postValue(mSendNum++);
+//                    LiveDataBus.get().with("sendNum").postValue(mSendNum++);
                     Thread.sleep(5000);
                 }
             } catch (InterruptedException e) {
@@ -1046,6 +1076,18 @@ public class TcpService extends Service {
         }
     };
 
+    private final Observer<byte[]> bulkDataObserver = new Observer<byte[]>() {
+        @Override
+        public void onChanged(@Nullable byte[] bytes) {
+            byte[] sendData = Utils.concat(bytes, mCheckCode);
+            if (mQueue.size() == mQueueSize) {
+                mQueue.poll();
+            }
+            mQueue.offer(sendData);
+//            Log.e(TAG, "initSuccess: " + offer );
+        }
+    };
+
     private final Observer<byte[]> faceObserver = new Observer<byte[]>() {
         @Override
         public void onChanged(@Nullable byte[] bytes) {
@@ -1071,6 +1113,13 @@ public class TcpService extends Service {
         @Override
         public void onChanged(@Nullable Boolean sw_port) {
             switchPort = sw_port;
+        }
+    };
+
+    private final Observer<Integer> numObserver = new Observer<Integer>() {
+        @Override
+        public void onChanged(@Nullable Integer integer) {
+            numPhoto = integer;
         }
     };
 
@@ -1102,5 +1151,8 @@ public class TcpService extends Service {
         LiveDataBus.get().with(BaseConstant.slabShutdownMessage, Integer.class).removeObserver(getSlabShutdownMessageObserver);
 
         LiveDataBus.get().with("switchPort", Boolean.class).removeObserver(switchPortObserver);
+
+        LiveDataBus.get().with("bulkData", byte[].class).removeObserver(bulkDataObserver);
+        LiveDataBus.get().with("NUM", Integer.class).removeObserver(numObserver);
     }
 }

@@ -38,14 +38,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.baidu.idl.face.main.api.Wiegand;
 import com.baidu.idl.face.main.callback.CameraDataCallback;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.camera.AutoTexturePreviewView;
 import com.baidu.idl.face.main.camera.CameraPreviewManager;
+import com.baidu.idl.face.main.camera.CameraPreviewManager_infrared;
 import com.baidu.idl.face.main.constant.BaseConstant;
 import com.baidu.idl.face.main.manager.FaceSDKManager;
+import com.baidu.idl.face.main.manager.FaceTrackManager;
 import com.baidu.idl.face.main.model.LivenessModel;
 import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.model.User;
@@ -69,6 +72,8 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -95,7 +100,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private Context mContext;
 
     // 关闭Debug 模式
-    private AutoTexturePreviewView mAutoCameraPreviewView;
+    private AutoTexturePreviewView mAutoCameraPreviewView, mAuto_camera_infrared;
     private TextureView mFaceDetectImageView;
     private Paint paint;
     private RectF rectF;
@@ -104,6 +109,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     private float mRgbLiveScore;
     private Button mMenubtn;
     private ImageView switchPort;
+    private ToggleButton mToggleButton;
 
     //播报mp3
     private SoundPool mSoundPool = null;
@@ -116,7 +122,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 存储人脸照片
      */
     private final Hashtable<String, byte[]> faceImage = new Hashtable<>();
-    private Bitmap mRBmp;
+    private Bitmap mRBmp = null;
 
     /**
      * 双击监听
@@ -169,7 +175,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 底部状态View 活体检测、识别通过、识别未通过、发送信息、服务器状态
      */
     private TextView mLiveTextView, mAdoptTextView, mErrorTextView, mSendTextView, mServerStateTextView;
-    private int mLiveNum, mAdoptNum, mErrorNum;
+    private int mLiveNum = 1, mAdoptNum = 1, mErrorNum = 1;
 
     /**
      * 蓝牙扫描
@@ -183,6 +189,11 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      * 字节数组输出流
      */
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+    /**
+     * 线程池
+     */
+    ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
 
     //切换寄存器地址 false: 21       true:22(需要注册的)
     private Boolean switchPortNum = false;
@@ -199,8 +210,6 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         mWiegand = Wiegand.getInstance();
 
         initView();
-
-        getDevicesNum();
 
         //监听时间戳，获取被赋值的时间比当前时间小于1秒，说明屏幕卡住不动了
 //        monitorTimestamp();
@@ -278,9 +287,15 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         //保持长亮
         mFaceDetectImageView.setKeepScreenOn(true);
 
+        //补光灯按钮
+//        mToggleButton = findViewById(R.id.toggle_btn);
+
         // 单目摄像头RGB 图像预览
         mAutoCameraPreviewView = findViewById(R.id.auto_camera_preview_view);
         mAutoCameraPreviewView.setVisibility(View.VISIBLE);
+        //红外摄像头 图像预览
+        mAuto_camera_infrared = findViewById(R.id.auto_camera_infrared);
+        mAuto_camera_infrared.setVisibility(View.VISIBLE);
 
         rlDiscernBg = findViewById(R.id.rlDiscernBg);
         detect_reg_image_item = findViewById(R.id.detect_reg_image_item);
@@ -335,6 +350,21 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 }
             }
         });
+
+     /*   //白色补光灯
+        mToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    manager.pullUpWhiteLight();
+                } else {
+                    manager.pullDownWhiteLight();
+                }
+
+            }
+        });*/
+
+        getDevicesNum();
     }
 
     /**
@@ -398,6 +428,63 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         startTestCloseDebugRegisterFunction();
+//        turnOnTheInfraredCamera();
+    }
+
+    private boolean mark = true;
+
+    //加载红外摄像头，用于检测人脸 开启补光灯
+    private void turnOnTheInfraredCamera() {
+//        handler.post(new Runnable() {
+//            @Override
+//            public void run() {
+        CameraPreviewManager_infrared.getInstance().setCameraFacing(CameraPreviewManager_infrared.CAMERA_FACING_BACK);
+        CameraPreviewManager_infrared.getInstance().startPreview(FaceRGBCloseDebugSearchActivity.this, mAuto_camera_infrared, PREFER_WIDTH, PERFER_HEIGH, new CameraDataCallback() {
+            @Override
+            public void onGetCameraData(byte[] data, Camera camera, int width, int height) {
+                // 摄像头预览数据进行人脸检测
+                        /*int liveType = SingleBaseConfig.getBaseConfig().getType();
+                        if (liveType == 1) { // 无活体检测
+                            FaceTrackManager.getInstance().setAliving(false);
+                        } else if (Integer.valueOf(liveType) == 2) { // 活体检测
+                            FaceTrackManager.getInstance().setAliving(true);
+                        }*/
+
+//                cachedThreadPool.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+                        if (mark) {
+                            FaceTrackManager.getInstance().faceTrack(data, width, height, new FaceDetectCallBack() {
+                                @Override
+                                public void onFaceDetectCallback(LivenessModel livenessModel) {
+                                    if (livenessModel != null) {
+//                                        mark = false;
+//                                        manager.pullUpWhiteLight();
+//                                        handler.postDelayed(() -> {
+//                                            manager.pullDownWhiteLight();
+//                                            mark = true;
+//                                        }, 20000);
+                                    }
+
+                                }
+
+                                @Override
+                                public void onTip(int code, String msg) {
+
+                                }
+
+                                @Override
+                                public void onFaceDetectDarwCallback(LivenessModel livenessModel) {
+
+                                }
+                            });
+                        }
+//                    }
+//                });
+            }
+        });
+//            }
+//        });
     }
 
     private void startTestCloseDebugRegisterFunction() {
@@ -405,7 +492,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         timeFlag = DateUtil.timeStamp();
 
         // 设置USB摄像头
-        CameraPreviewManager.getInstance().setCameraFacing(CameraPreviewManager.CAMERA_USB);
+        CameraPreviewManager.getInstance().setCameraFacing(CameraPreviewManager.CAMERA_FACING_FRONT);
         CameraPreviewManager.getInstance().startPreview(this, mAutoCameraPreviewView,
                 PREFER_WIDTH, PERFER_HEIGH, new CameraDataCallback() {
                     @Override
@@ -521,14 +608,18 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 
                     }
                     //获取照片
-                    mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
+                    try {
+                        mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
+                    } catch (OutOfMemoryError e) {
+                        ToastUtils.toast(FaceRGBCloseDebugSearchActivity.this, "" + e.toString());
+                    }
                     //获取照片亮度值
-                    int bright = getBright(mRBmp);
+//                    int bright = getBright(mRBmp);
                     //如果这个值比128大，则这个图片较亮，如果这个值比128小，则这个图比较暗。
                     /*if (whiteLight_Status == 0 && bright > BRIGHTNESS_VALUE) {
                         delayLight();
                     }*/
-                    try {
+                   /* try {
                         if (whiteLight_Status == 0 && bright < BRIGHTNESS_VALUE) {
                             manager.pullUpWhiteLight();
                         }
@@ -536,7 +627,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     } catch (Exception e) {
                         Log.e("loge", "run:----- pullUpWhiteLight----异常" + e.toString() + "\r\n");
                         ToastUtils.toast(getApplicationContext(), "pullUpWhiteLight--异常");
-                    }
+                    }*/
 
 //                    Log.e("bright", "图片亮度: " + bright + "白色补光的状态是: " + manager.getWhiteLightStatus());
                     //压缩照片
@@ -548,14 +639,6 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                     if (user == null) {
 //                        ToastUtils.toast(mContext,"识别失败");
                         if (livenessModel.getFeatureContrastValue() < 80.00) {
-
-                            //延迟3秒发送给后台图片、特征值
-                            delaySendData(livenessModel, imageData, null);
-                            //识别失败
-                            discernFailureView();
-                            //发送串口数据
-                            sendSerialPortData(null);
-
 
                             try {
                                 if (GreenLight_Status == 1) {
@@ -574,27 +657,16 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                                 ToastUtils.toast(getApplicationContext(), "delayRedLight()---异常");
                             }
 
+                            //延迟3秒发送给后台图片、特征值
+                            delaySendData(livenessModel, imageData, null);
+                            //识别失败
+                            discernFailureView();
+                            //发送串口数据
+                            sendSerialPortData(null);
+
                         }
                     } else {
 //                        ToastUtils.toast(mContext,"识别成功");
-                        if (faceImage.containsKey(user.getUserName())) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
-                            //识别成功
-                            discernSucceedView(user.getUserName(), bitmap);
-                        } else {
-                            //获取照片
-                            mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
-                            //压缩照片
-                            mRBmp.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
-                            faceImage.put(user.getUserName(), byteArrayOutputStream.toByteArray());
-                            byteArrayOutputStream.reset();
-                            //识别成功
-                            discernSucceedView(user.getUserName(), mRBmp);
-                        }
-                        //延迟3秒发送给后台图片，特征，人名，卡号
-                        delaySendData(livenessModel, imageData, user);
-                        //发送串口数据
-                        sendSerialPortData(user);
 
                         try {
                             if (RedLight_Status == 1) {
@@ -614,6 +686,24 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                             ToastUtils.toast(getApplicationContext(), "delayGreenLight---异常");
                         }
 
+                        if (faceImage.containsKey(user.getUserName())) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(faceImage.get(user.getUserName()), 0, faceImage.get(user.getUserName()).length);
+                            //识别成功
+                            discernSucceedView(user.getUserName(), bitmap);
+                        } else {
+                            //获取照片
+                            mRBmp = BitmapUtils.getInstaceBmp(livenessModel.getBdFaceImageInstance());
+                            //压缩照片
+                            mRBmp.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+                            faceImage.put(user.getUserName(), byteArrayOutputStream.toByteArray());
+                            byteArrayOutputStream.reset();
+                            //识别成功
+                            discernSucceedView(user.getUserName(), mRBmp);
+                        }
+                        //延迟3秒发送给后台图片，特征，人名，卡号
+                        delaySendData(livenessModel, imageData, user);
+                        //发送串口数据
+                        sendSerialPortData(user);
 
                     }
                 }
@@ -642,41 +732,33 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
     }
 
     private void delayGreenLight() {
-//        if (manager.getRedLightStatus().equals("1")) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                manager.pullDownWhiteLight();
-                whiteLight_Status = 1;
-                manager.pullUpGreenLight();
-                GreenLight_Status = 1;
-            }
-        }, 200);
-//        }
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+        manager.pullUpGreenLight();
+        GreenLight_Status = 1;
+//            }
+//        }, 200);
     }
 
     private void delayRedLight() {
-//        if (manager.getRedLightStatus().equals("1")) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                manager.pullDownWhiteLight();
-                whiteLight_Status = 1;
-                manager.pullUpRedLight();
-                RedLight_Status = 1;
-            }
-        }, 200);
-//        }
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+        manager.pullUpRedLight();
+        RedLight_Status = 1;
+//            }
+//        }, 200);
     }
 
     private void delayClose_Red_GedreenLight() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                manager.pullDownGreenLight();
-                manager.pullDownRedLight();
-            }
-        }, 200);
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+        manager.pullDownGreenLight();
+        manager.pullDownRedLight();
+//            }
+//        }, 200);
     }
 
 
@@ -862,10 +944,16 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
             }
         }
 
-//        closeAllLight();
         delayClose_Red_GedreenLight();
         //关闭监听屏幕有没有卡住线程
-        timeFlagBool = false;
+//        timeFlagBool = false;
+        // 先判断是否已经回收
+        if (mRBmp != null && !mRBmp.isRecycled()) {
+            // 回收并且置为null
+            mRBmp.recycle();
+            mRBmp = null;
+        }
+        System.gc();
     }
 
     @Override
@@ -910,6 +998,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
                 .setTitle("提示")
                 .setMessage(text)
                 .setPositiveButton("确定", null)
+                .setCancelable(false)
                 .show();
     }
 

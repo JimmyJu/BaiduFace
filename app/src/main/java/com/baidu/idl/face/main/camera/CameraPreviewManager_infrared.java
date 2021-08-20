@@ -21,7 +21,7 @@ import java.util.List;
  * Author: v_chaixiaogang
  * Description:
  */
-public class CameraPreviewManager implements TextureView.SurfaceTextureListener {
+public class CameraPreviewManager_infrared implements TextureView.SurfaceTextureListener {
 
     private static final String TAG = "camera_preview";
 
@@ -72,7 +72,7 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
     private int cameraId = 1;
     private int mirror = 1; // 镜像处理
     private CameraDataCallback mCameraDataCallback;
-    private static volatile CameraPreviewManager instance = null;
+    private static volatile CameraPreviewManager_infrared instance = null;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
 
@@ -88,10 +88,10 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
         ORIENTATIONS.append(Surface.ROTATION_270, 270);
     }
 
-    public static CameraPreviewManager getInstance() {
-        synchronized (CameraPreviewManager.class) {
+    public static CameraPreviewManager_infrared getInstance() {
+        synchronized (CameraPreviewManager_infrared.class) {
             if (instance == null) {
-                instance = new CameraPreviewManager();
+                instance = new CameraPreviewManager_infrared();
             }
         }
         return instance;
@@ -121,7 +121,7 @@ public class CameraPreviewManager implements TextureView.SurfaceTextureListener 
      */
     public void startPreview(Context context, AutoTexturePreviewView textureView, int width,
                              int height, CameraDataCallback cameraDataCallback) {
-        Log.e(TAG, "开启预览模式");
+        Log.e(TAG, "红外相机开启预览模式");
         mContext = context;
         this.mCameraDataCallback = cameraDataCallback;
         mTextureView = textureView;

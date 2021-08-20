@@ -1,8 +1,8 @@
 package com.baidu.idl.face.main.manager;
 
-import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.face.main.callback.FaceDetectCallBack;
 import com.baidu.idl.face.main.model.LivenessModel;
+import com.baidu.idl.face.main.model.SingleBaseConfig;
 import com.baidu.idl.main.facesdk.FaceInfo;
 import com.baidu.idl.main.facesdk.model.BDFaceImageInstance;
 import com.baidu.idl.main.facesdk.model.BDFaceOcclusion;
@@ -84,6 +84,11 @@ public class FaceTrackManager {
             @Override
             public void run() {
                 faceDataDetect(argb, width, height, faceDetectCallBack);
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
         });
     }
@@ -98,10 +103,11 @@ public class FaceTrackManager {
      */
     private void faceDataDetect(final byte[] argb, int width, int height, FaceDetectCallBack faceDetectCallBack) {
         LivenessModel livenessModel = new LivenessModel();
-
+//此处的270针对设备 红外摄像头而修改的
         BDFaceImageInstance rgbInstance = new BDFaceImageInstance(argb, height, width,
                 BDFaceSDKCommon.BDFaceImageType.BDFACE_IMAGE_TYPE_YUV_420,
-                SingleBaseConfig.getBaseConfig().getDetectDirection(),
+//                SingleBaseConfig.getBaseConfig().getDetectDirection(),
+                270,
                 SingleBaseConfig.getBaseConfig().getMirrorRGB());
         livenessModel.setBdFaceImageInstance(rgbInstance);
         long startTime = System.currentTimeMillis();
@@ -129,6 +135,7 @@ public class FaceTrackManager {
                 }
                 // 流程结束销毁图片，开始下一帧图片检测，否着内存泄露
                 rgbInstance.destory();
+
                 if (faceDetectCallBack != null) {
                     faceDetectCallBack.onFaceDetectCallback(livenessModel);
                 }
@@ -145,6 +152,10 @@ public class FaceTrackManager {
                 faceDetectCallBack.onFaceDetectCallback(null);
             }
         }
+
+
+//        System.gc();
+//        Log.e("TAG", "111111111111___GC");
     }
 
 

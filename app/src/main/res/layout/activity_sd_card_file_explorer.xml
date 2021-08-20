@@ -32,8 +32,67 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/dp_400"
         android:padding="@dimen/dp_10" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        >
+
+        <TextView
+            android:id="@+id/logView"
+            android:layout_width="@dimen/dp_200"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="false"
+            android:padding="@dimen/dp_10"
+            android:scrollbars="vertical"
+            android:singleLine="false" />
+
+        <TextView
+            android:id="@+id/logFail"
+            android:layout_width="@dimen/dp_100"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="false"
+            android:padding="@dimen/dp_10"
+            android:scrollbars="vertical"
+            android:layout_toRightOf="@id/logView"
+            android:singleLine="false" />
+        <LinearLayout
+            android:layout_alignParentEnd="true"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:id="@+id/mTotal"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:textColor="@color/black"
+                android:gravity="center_vertical"
+
+                />
+            <TextView
+                android:id="@+id/mSuccess"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                />
+            <TextView
+                android:id="@+id/mFail"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:gravity="center_vertical"
+                />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
 
 
 </LinearLayout>
