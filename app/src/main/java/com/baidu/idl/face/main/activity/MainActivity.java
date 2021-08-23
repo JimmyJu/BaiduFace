@@ -348,6 +348,8 @@ public class MainActivity extends BaseActivity {
         GPIOManager.getInstance(this).pullDownRedLight();
         GPIOManager.getInstance(this).pullDownGreenLight();
         GPIOManager.getInstance(this).pullDownWhiteLight();
+        Intent service = new Intent(this, TcpService.class);
+        stopService(service);
     }
 
     @Override
