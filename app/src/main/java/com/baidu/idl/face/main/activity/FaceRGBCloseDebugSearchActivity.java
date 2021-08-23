@@ -295,7 +295,7 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
         mAutoCameraPreviewView.setVisibility(View.VISIBLE);
         //红外摄像头 图像预览
         mAuto_camera_infrared = findViewById(R.id.auto_camera_infrared);
-        mAuto_camera_infrared.setVisibility(View.VISIBLE);
+        mAuto_camera_infrared.setVisibility(View.INVISIBLE);
 
         rlDiscernBg = findViewById(R.id.rlDiscernBg);
         detect_reg_image_item = findViewById(R.id.detect_reg_image_item);

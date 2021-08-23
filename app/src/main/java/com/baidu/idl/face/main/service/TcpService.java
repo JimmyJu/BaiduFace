@@ -695,9 +695,6 @@ public class TcpService extends Service {
                         if (isSuccess) {
                             success++;
 //                            Log.e(TAG, "插入 用户 " + username.trim() + " 卡号 " + card);
-                        } else {
-                            isRequest = true;
-                            return;
                         }
                     }
 
