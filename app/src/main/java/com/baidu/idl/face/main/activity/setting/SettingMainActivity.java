@@ -4,9 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.baidu.idl.face.main.activity.BaseActivity;
+import com.baidu.idl.face.main.activity.SDCardFileExplorerTestActivity;
 import com.baidu.idl.facesdkdemo.R;
 
 /**
@@ -61,6 +63,8 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
 
         ImageButton smBack = findViewById(R.id.sm_back);
 
+        LinearLayout photo_detection = findViewById(R.id.photo_detection);
+
         smFaceDetectAngle.setOnClickListener(this);
         smCameraDisplayAngle.setOnClickListener(this);
         smMinFace.setOnClickListener(this);
@@ -92,6 +96,8 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
         tvIp.setOnClickListener(this);
 
         smBack.setOnClickListener(this);
+
+        photo_detection.setOnClickListener(this);
     }
 
 
@@ -208,6 +214,9 @@ public class SettingMainActivity extends BaseActivity implements View.OnClickLis
                 goActivity(WiegandActivity.class);
                 break;
 
+            case R.id.photo_detection:
+                goActivity(SDCardFileExplorerTestActivity.class);
+                break;
             case R.id.tv_ip:
                 //服务器地址修改
                 goActivity(IpAddressActivity.class);

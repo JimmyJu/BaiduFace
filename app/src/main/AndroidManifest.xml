@@ -145,6 +145,9 @@
             android:name="com.baidu.idl.face.main.activity.SDCardFileExplorerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" /> <!-- 安全设备指纹接入 start -->
         <activity
+            android:name="com.baidu.idl.face.main.activity.SDCardFileExplorerTestActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
             android:name="com.baidu.liantian.LiantianActivity"
             android:excludeFromRecents="true"
             android:exported="true"

@@ -556,6 +556,42 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/photo_detection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="25dp"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <View style="@style/SettingMainBlackPoint" />
+
+                            <TextView
+                                style="@style/SettingMainTitle"
+                                android:text="照片检测" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:orientation="horizontal">
+
+
+                            <TextView
+                                style="@style/SettingMainExplain"
+                                android:text="检测要上传的照片是否合格，能否取到特征值" />
+                        </LinearLayout>
+                    </LinearLayout>
+
 
                     <LinearLayout
                         android:layout_width="match_parent"
