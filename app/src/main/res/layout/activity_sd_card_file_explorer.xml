@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -43,11 +44,21 @@
 
         <TextView
             android:id="@+id/logView"
-            android:layout_width="@dimen/dp_200"
+            android:layout_width="@dimen/dp_120"
             android:layout_height="match_parent"
             android:fadeScrollbars="false"
             android:padding="@dimen/dp_10"
             android:scrollbars="vertical"
+            android:singleLine="false" />
+
+        <TextView
+            android:id="@+id/upload_log"
+            android:layout_width="@dimen/dp_90"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="false"
+            android:padding="@dimen/dp_10"
+            android:scrollbars="vertical"
+            android:layout_toRightOf="@id/logView"
             android:singleLine="false" />
 
         <TextView
@@ -57,7 +68,7 @@
             android:fadeScrollbars="false"
             android:padding="@dimen/dp_10"
             android:scrollbars="vertical"
-            android:layout_toRightOf="@id/logView"
+            android:layout_toRightOf="@id/upload_log"
             android:singleLine="false" />
         <LinearLayout
             android:layout_alignParentEnd="true"
@@ -72,6 +83,7 @@
                 android:layout_height="0dp"
                 android:textColor="@color/black"
                 android:gravity="center_vertical"
+                tools:text="总数"
 
                 />
             <TextView
@@ -80,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:gravity="center_vertical"
+                tools:text="成功"
                 />
             <TextView
                 android:id="@+id/mFail"
@@ -87,6 +100,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:gravity="center_vertical"
+                tools:text="失败"
                 />
 
         </LinearLayout>

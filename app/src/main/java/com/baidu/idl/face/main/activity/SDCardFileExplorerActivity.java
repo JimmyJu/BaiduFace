@@ -70,7 +70,7 @@ public class SDCardFileExplorerActivity extends BaseActivity {
     private Button bt_return;
     private RecyclerView recyclerView;
     private SDCardFileExplorerAdapter adapter;
-    private TextView logView, logFail, tv_mSuccess, tv_mFail, tv_mTotal;
+    private TextView logView, logFail, tv_mSuccess, tv_mFail, tv_mTotal, upload_log;
     private int mSuccess = 1, mFail = 1, mTotal;
 
     // 记录当前的父文件夹
@@ -127,9 +127,11 @@ public class SDCardFileExplorerActivity extends BaseActivity {
 
         logFail = findViewById(R.id.logFail);
         logView = (TextView) findViewById(R.id.logView);
+        upload_log = findViewById(R.id.upload_log);
         //配置TextView的滚动方式
         logView.setMovementMethod(ScrollingMovementMethod.getInstance());
         logFail.setMovementMethod(ScrollingMovementMethod.getInstance());
+        upload_log.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         recyclerView = findViewById(R.id.recyclerView);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -173,6 +175,23 @@ public class SDCardFileExplorerActivity extends BaseActivity {
                 if (offset > logFail.getHeight()) {
                     //更新文字时，使用View的scrollTo(int x,int y)方法使其自动滚动到最后一行
                     logFail.scrollTo(0, offset - logFail.getHeight());
+                }
+            }
+        });
+    }
+
+    /**
+     * @param msg 展示上传失败的工号
+     */
+    void refreshUploadLogView(String msg) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                upload_log.append(Html.fromHtml(msg));
+                int offset = upload_log.getLineCount() * upload_log.getLineHeight();
+                if (offset > upload_log.getHeight()) {
+                    //更新文字时，使用View的scrollTo(int x,int y)方法使其自动滚动到最后一行
+                    upload_log.scrollTo(0, offset - upload_log.getHeight());
                 }
             }
         });
@@ -289,7 +308,7 @@ public class SDCardFileExplorerActivity extends BaseActivity {
                                         Log.e("TAG", "initSuccess: " + name + "__" + "未检测到人脸");
 //                                        refreshLogView(name + ": " + "未检测到人脸,图片不合格");
                                         refreshLogView("<font color='#ff0000'> " + name + "： </font>" + "<font color='#ff0000'> 未检测到人脸,图片不合格 </font> <br/>");
-                                        refreshLogFail("<font color='#ff0000'> 工号 ： </font>" + "<font color='#ff0000'> " + name + " </font> <br/>");
+                                        refreshLogFail("<font color='#ff0000'> 工号 ： </font>" + "<font color='#ff0000'> " + name + " 图片不合格 </font> <br/>");
                                         tv_mFail.post(new Runnable() {
                                             @Override
                                             public void run() {
@@ -297,8 +316,9 @@ public class SDCardFileExplorerActivity extends BaseActivity {
                                             }
                                         });
                                     } else if (ret == 128) {
-                                        j++;
-                                        Log.e("TAG", "initSuccess: " + name + "__" + "图片合格 " + Utils.addZero(name));
+                                        //要传入的的图片编号
+                                        int picture_id = j++;
+//                                        Log.e("TAG", "initSuccess: " + name + "__" + "图片合格 " + Utils.addZero(name));
 //                                        refreshLogView(name + ": " + "图片合格");
                                         refreshLogView("<font color='#16CC77'> " + name + "： </font>" + "<font color='#16CC77'> 图片合格 </font> <br/>");
 
@@ -312,17 +332,22 @@ public class SDCardFileExplorerActivity extends BaseActivity {
                                                     //照片信息字节
                                                     imageData
                                             );
-                                            byte[] send = Utils.addBytes(mRuleHead, Utils.concat(mRegisterAdress23, Utils.hexString2Bytes(Utils.addZero1(j++ + ""))), bulkData);
-//                                            byte[] bytes1 = Utils.hexString2Bytes(Utils.addZero1(j++ + ""));
-//                                            String s = Utils.byteToHex(bytes1);
+                                            byte[] photoNumberByte = Utils.hexString2Bytes(Utils.addZero1(picture_id + ""));
+                                            byte[] send = Utils.addBytes(mRuleHead, Utils.concat(mRegisterAdress23, photoNumberByte), bulkData);
+
+                                            String s = Utils.byteToHex(photoNumberByte);
 //                                            Log.e(TAG, "run: " + s);
-//                                            LiveDataBus.get().with("NUM", Integer.class).postValue(Integer.valueOf(s));
+                                            LiveDataBus.get().with("NUM", Integer.class).postValue(Integer.valueOf(s));
 
 //                                            if (flag) {
-                                                LiveDataBus.get().with("bulkData").postValue(send);
+                                            LiveDataBus.get().with("bulkData").postValue(send);
 //                                            }
 
-//                                            mHandler.postDelayed(() -> {
+                                            mHandler.postDelayed(() -> {
+                                                Log.e("TAG", "编号: " + picture_id + " 工号: " + name + "--" + "图片合格 " + isSuss);
+                                                if (!isSuss) {
+                                                    refreshUploadLogView("<font color='#ff0000'> " + name + "： </font>" + "<font color='#ff0000'> 上传失败！ </font> <br/>");
+                                                }
 //                                                if (isSuss) {
 //                                                    Log.e(TAG, "run: " + isSuss);
 //                                                    flag = true;
@@ -332,7 +357,7 @@ public class SDCardFileExplorerActivity extends BaseActivity {
 ////                                                LiveDataBus.get().with("bulkData").postValue(send);
 //
 //                                                }
-//                                            }, 1000);
+                                            }, 200);
 
                                         } catch (Exception e) {
                                             e.printStackTrace();

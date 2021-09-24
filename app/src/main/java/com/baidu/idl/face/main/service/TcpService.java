@@ -369,16 +369,17 @@ public class TcpService extends Service {
                         byte[] content = new byte[2];
                         System.arraycopy(buffer, 12, content, 0, 2);
                         String str = new String(content);
-                        Log.e(TAG, "图片状态: " + str + " 编号： " + s);
-//                        Log.e(TAG, "run: " + numPhoto );
+                        Log.e(TAG, "图片状态: " + str + " 服务返回的照片编号： " + Integer.valueOf(s) + " 当前上传的编号: " + numPhoto);
 
-//                        if (String.valueOf(numPhoto).equals(s)) {
-//                            if ("ER".equals(str)) {
-//                                LiveDataBus.get().with("bulkUpload").postValue(false);
-//                            } else if ("OK".equals(str)) {
-//                                LiveDataBus.get().with("bulkUpload").postValue(true);
-//                            }
-//                        }
+                        if (Integer.valueOf(s).equals(numPhoto)) {
+                            if ("ER".equals(str)) {
+                                //失败
+                                LiveDataBus.get().with("bulkUpload").postValue(false);
+                            } else if ("OK".equals(str)) {
+                                //成功
+                                LiveDataBus.get().with("bulkUpload").postValue(true);
+                            }
+                        }
 
                     }
 //                    else if (size == 19) { // size == 18说明是收到删除人员信息
