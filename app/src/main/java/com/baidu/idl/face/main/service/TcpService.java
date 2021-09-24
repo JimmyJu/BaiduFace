@@ -421,7 +421,7 @@ public class TcpService extends Service {
                                 //获取标识码
                                 byte[] infoCode = new byte[1];
                                 System.arraycopy(buffer, 10, infoCode, 0, 1);
-                                if ((size - 15) % 526 == 0) { //没有余数说明是完整的包
+                                if ((size - 15) % 536 == 0) { //没有余数说明是完整的包
 
                                     addStaff(buffer, size);
                                     flag = true;
@@ -435,7 +435,7 @@ public class TcpService extends Service {
                             } else if (Arrays.equals(category, mFaceLibCategory)) {
                                 byte[] infoCode = new byte[1];
                                 System.arraycopy(buffer, 10, infoCode, 0, 1);
-                                if ((size - 14) % 526 == 0) { //没有余数说明是完整的包
+                                if ((size - 14) % 536 == 0) { //没有余数说明是完整的包
                                     registerStartAddress(buffer, size);
                                     FaceApi.getInstance().initDatabases(true);
 //                                    Log.e("TAG", "FaceLib_infoCode: " + Utils.byteToHex(infoCode));
@@ -608,7 +608,7 @@ public class TcpService extends Service {
         int faceNum = Utils.bytesToInt(faceNumByte);
         if (inTotalInfoBool) {
             //总人员信息
-            inTotalInfo = faceNum + (size - 14) / 526;
+            inTotalInfo = faceNum + (size - 14) / 536;
             inTotalInfoBool = false;
         }
         //获取后台人脸特征库
@@ -645,26 +645,26 @@ public class TcpService extends Service {
                 //人员信息字节长度
                 int personnelInfoSize = size - 14;
 
-                for (int i = 1; i <= personnelInfoSize / 526; i++) {
+                for (int i = 1; i <= personnelInfoSize / 536; i++) {
 
                     byte[] personnelInfoByte = new byte[personnelInfoSize];
                     System.arraycopy(data, 12, personnelInfoByte, 0, personnelInfoSize);
 
-                    int j = personnelInfoSize / (personnelInfoSize / 526);
+                    int j = personnelInfoSize / (personnelInfoSize / 536);
 
                     byte[] featureByte = new byte[512];
 
                     byte[] cardByte = new byte[4];
 
-                    byte[] nameByte = new byte[10];
+                    byte[] nameByte = new byte[20];
 
                     if (i == 1) {
                         //人脸信息
                         System.arraycopy(personnelInfoByte, 0, featureByte, 0, 512);
                         //卡号
-                        System.arraycopy(personnelInfoByte, j * i - 14, cardByte, 0, 4);
+                        System.arraycopy(personnelInfoByte, j * i - 24, cardByte, 0, 4);
                         //人名
-                        System.arraycopy(personnelInfoByte, j * i - 10, nameByte, 0, 10);
+                        System.arraycopy(personnelInfoByte, j * i - 20, nameByte, 0, 20);
                     } else {
                         //人脸信息
                         if (j * (i - 1) <= personnelInfoSize) {
@@ -673,7 +673,7 @@ public class TcpService extends Service {
                         //卡号
                         System.arraycopy(personnelInfoByte, j * (i - 1) + 512, cardByte, 0, 4);
                         //人名
-                        System.arraycopy(personnelInfoByte, j * (i - 1) + 516, nameByte, 0, 10);
+                        System.arraycopy(personnelInfoByte, j * (i - 1) + 516, nameByte, 0, 20);
                     }
 
                     //卡号
@@ -689,8 +689,8 @@ public class TcpService extends Service {
 
                     Log.e(TAG, "run: " + "card: " + username.trim() +
                             "  getCard: " + FaceApi.getInstance().getUserByUserName("default", username) + "---->" + !(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))));
-
-                    if (!(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))) && !Utils.isMessyCode(username.trim()) && Utils.isNumeric(card.trim())) {
+                    //&& Utils.isNumeric(card.trim()) 判断卡号是否纯数字
+                    if (!(username.trim().equals(FaceApi.getInstance().getUserByUserName("default", username))) && !Utils.isMessyCode(username.trim())) {
                         //添加到数据库中
                         isSuccess = FaceApi.getInstance().registerUserIntoDBmanager("default", username, "imagename.jpg", card, featureByte);
                         if (isSuccess) {
@@ -771,25 +771,25 @@ public class TcpService extends Service {
             public void run() {
                 //人员信息字节长度
                 int personnelInfoSize = size - 15;
-                for (int i = 1; i <= personnelInfoSize / 526; i++) {
+                for (int i = 1; i <= personnelInfoSize / 536; i++) {
                     byte[] personnelInfoByte = new byte[personnelInfoSize];
                     System.arraycopy(data, 13, personnelInfoByte, 0, personnelInfoSize);
 
-                    int j = personnelInfoSize / (personnelInfoSize / 526);
+                    int j = personnelInfoSize / (personnelInfoSize / 536);
 
                     byte[] featureByte = new byte[512];
 
                     byte[] cardByte = new byte[4];
 
-                    byte[] nameByte = new byte[10];
+                    byte[] nameByte = new byte[20];
 
                     if (i == 1) {
                         //人脸信息
                         System.arraycopy(personnelInfoByte, 0, featureByte, 0, 512);
                         //卡号
-                        System.arraycopy(personnelInfoByte, j * i - 14, cardByte, 0, 4);
+                        System.arraycopy(personnelInfoByte, j * i - 24, cardByte, 0, 4);
                         //人名
-                        System.arraycopy(personnelInfoByte, j * i - 10, nameByte, 0, 10);
+                        System.arraycopy(personnelInfoByte, j * i - 20, nameByte, 0, 20);
                     } else {
                         //人脸信息
                         if (j * (i - 1) <= personnelInfoSize) {
@@ -798,7 +798,7 @@ public class TcpService extends Service {
                         //卡号
                         System.arraycopy(personnelInfoByte, j * (i - 1) + 512, cardByte, 0, 4);
                         //人名
-                        System.arraycopy(personnelInfoByte, j * (i - 1) + 516, nameByte, 0, 10);
+                        System.arraycopy(personnelInfoByte, j * (i - 1) + 516, nameByte, 0, 20);
                     }
                     //卡号
                     String card = Utils.byteToHex(cardByte);

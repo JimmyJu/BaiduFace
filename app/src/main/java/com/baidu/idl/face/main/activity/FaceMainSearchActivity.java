@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.TextView;
 
 import com.baidu.idl.face.main.activity.setting.SettingMainActivity;
+import com.baidu.idl.face.main.utils.Utils;
 import com.baidu.idl.facesdkdemo.R;
 import com.example.yfaceapi.GPIOManager;
 
@@ -19,6 +21,8 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
     public static final int PAGE_TYPE = 999;
     GPIOManager manager;
     private Handler handler = new Handler();
+
+    private TextView mVer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +54,11 @@ public class FaceMainSearchActivity extends BaseActivity implements View.OnClick
         findViewById(R.id.btn_setting).setOnClickListener(this);
         findViewById(R.id.btn_auth).setOnClickListener(this);
         findViewById(R.id.btn_back).setOnClickListener(this);
+
+        mVer = findViewById(R.id.tv_ver);
+        String versionName = Utils.getVersionName(this);
+//        Log.e("TAG", "当前版本名: " + versionName);
+        mVer.setText("当前版本: " + versionName);
     }
 
     @Override

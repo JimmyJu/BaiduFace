@@ -141,9 +141,10 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
      */
     private byte[] cardNumberByte = new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
     /**
-     * 人员名称
+     * 人员名称 20个字节
      */
-    private byte[] personnelNameByte = new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+    private byte[] personnelNameByte = new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+            (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00};
 
     /**
      * 照片信息头
@@ -453,32 +454,32 @@ public class FaceRGBCloseDebugSearchActivity extends BaseActivity {
 //                cachedThreadPool.execute(new Runnable() {
 //                    @Override
 //                    public void run() {
-                        if (mark) {
-                            FaceTrackManager.getInstance().faceTrack(data, width, height, new FaceDetectCallBack() {
-                                @Override
-                                public void onFaceDetectCallback(LivenessModel livenessModel) {
-                                    if (livenessModel != null) {
+                if (mark) {
+                    FaceTrackManager.getInstance().faceTrack(data, width, height, new FaceDetectCallBack() {
+                        @Override
+                        public void onFaceDetectCallback(LivenessModel livenessModel) {
+                            if (livenessModel != null) {
 //                                        mark = false;
 //                                        manager.pullUpWhiteLight();
 //                                        handler.postDelayed(() -> {
 //                                            manager.pullDownWhiteLight();
 //                                            mark = true;
 //                                        }, 20000);
-                                    }
+                            }
 
-                                }
-
-                                @Override
-                                public void onTip(int code, String msg) {
-
-                                }
-
-                                @Override
-                                public void onFaceDetectDarwCallback(LivenessModel livenessModel) {
-
-                                }
-                            });
                         }
+
+                        @Override
+                        public void onTip(int code, String msg) {
+
+                        }
+
+                        @Override
+                        public void onFaceDetectDarwCallback(LivenessModel livenessModel) {
+
+                        }
+                    });
+                }
 //                    }
 //                });
             }

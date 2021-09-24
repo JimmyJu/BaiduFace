@@ -35,7 +35,7 @@ public class Utils {
                 e.printStackTrace();
             }
         }
-        return "3.0.0";
+        return "";
     }
 
 
